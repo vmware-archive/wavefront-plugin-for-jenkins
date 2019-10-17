@@ -1,4 +1,4 @@
-![wavefront-logo](/uploads/8d21fd2213f80423149247d79c5cf8f4/wavefront-logo.png)
+![wavefront-logo](https://user-images.githubusercontent.com/56251894/67003694-32172500-f0e7-11e9-92b2-7952d76f84d9.png)
 # Wavefront Jenkins Plugin
 
 ### Content
@@ -40,7 +40,7 @@ job metrics are prefixed with ***wavefront.jenkins.plugin.job*** prefix by defau
 #### Optional metrics
 You can set whether or not to send JUnit and Jacoco reports from job the respective job properties.
 
-![job-property](/uploads/321aed385b9663550f8bd1be4fecb0f2/image.png)
+![job-property](https://user-images.githubusercontent.com/56251894/67005222-d2bb1400-f0ea-11e9-813c-b8ada4b20a0f.png)
 
 #### Available metrics:
 1.	**Jenkins system** – System CPU (This value is a double in the [0.0, 1.0] interval), Total physical memory (in bytes), Free physical memory (in bytes), Max heap memory (in bytes), Used heap memory (in bytes). Metric name: *\<metric-prefix\>.system-cpu*. List:
@@ -84,7 +84,7 @@ You can set whether or not to send JUnit and Jacoco reports from job the respect
 
 Plugin can be configured from Jenkins UI.
 
-![manage-plugin](/uploads/2856d21058b712b9a601ae4626577c4a/manage-plugin.png)
+![manage-plugin](https://user-images.githubusercontent.com/56251894/67005281-ee261f00-f0ea-11e9-8d9a-5e0cc8beb496.png)
 
 The plugin can be configured from the *Wavefront plugin configuration* section under Jenkins management page.
 From *Wavefront proxy configuration section* we need to set up:
@@ -94,7 +94,7 @@ From *Wavefront proxy configuration section* we need to set up:
 
 If proxy hostname is not specified (left empty) then no metrics will be sent to Wavefront.
 
-![plugin-configuration](/uploads/853e3dce25d6e7a6305427d274ae4fd8/image.png)
+![plugin-configuration](https://user-images.githubusercontent.com/56251894/67005306-fd0cd180-f0ea-11e9-8985-e53a3984f83d.png)
 
 ## Contributing
 
