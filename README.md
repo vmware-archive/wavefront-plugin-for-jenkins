@@ -1,5 +1,5 @@
 ![wavefront-logo](https://user-images.githubusercontent.com/56251894/67003694-32172500-f0e7-11e9-92b2-7952d76f84d9.png)
-# Wavefront Jenkins Plugin
+# Wavefront Plugin for Jenkins
 
 ### Content
 - [Overview](#overview)
@@ -31,14 +31,14 @@ Before installing Wavefront Plugin for Jenkins on your instance you need to inst
 
 There are 2 kinds of metric data that the plugin process:
 * Jenkins system and node label metrics - these are sent periodically every 5 minutes by default. This can be customized from the [*Wavefront plugin configuration*](#configuration) page (See *Flush Interval* field).
-* Job and pipeline metrics - these are send on job run completion.
+* Job and pipeline metrics - these are sent on job run completion.
 
 #### Metrics types prefixes
 Jenkins system and node label metrics are prefixed and sent to Wavefront with ***wavefront.jenkins.plugin*** and
 job metrics are prefixed with ***wavefront.jenkins.plugin.job*** prefix by default. These prefixes can be customized from the *Wavefront plugin configuration* page.
 
 #### Optional metrics
-You can set whether or not to send JUnit and Jacoco reports from job the respective job properties.
+You can set whether to send JUnit and Jacoco reports from job the respective job properties.
 
 ![job-property](https://user-images.githubusercontent.com/56251894/67005222-d2bb1400-f0ea-11e9-813c-b8ada4b20a0f.png)
 
