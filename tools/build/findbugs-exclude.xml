@@ -1,0 +1,9 @@
+<FindBugsFilter>
+
+    <Match>
+        <Not>
+            <Bug code="WEAK_TRUST_MANAGER"/>
+        </Not>
+    </Match>
+
+</FindBugsFilter>
