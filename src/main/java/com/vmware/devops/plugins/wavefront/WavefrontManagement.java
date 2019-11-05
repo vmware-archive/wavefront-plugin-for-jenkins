@@ -246,7 +246,7 @@ public class WavefrontManagement extends ManagementLink implements StaplerProxy,
     }
 
     private String sanitizeMetricCategory(String name) {
-        return name.toLowerCase().replaceAll("[&\\s]", "_");
+        return name.toLowerCase().replaceAll("[&\\s()=:]", "_");
     }
 
     @Override

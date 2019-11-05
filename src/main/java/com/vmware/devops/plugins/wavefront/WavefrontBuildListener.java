@@ -320,11 +320,11 @@ public class WavefrontBuildListener extends RunListener<Run> {
     }
 
     private String sanitizeMetricCategory(String name) {
-        return name.toLowerCase().replaceAll("[&\\s\\.]", "_");
+        return name.toLowerCase().replaceAll("[&\\s\\.()=:]", "_");
     }
 
     private String sanitizeJUnitTestMetricCategory(String name) {
-        String result = name.toLowerCase().replaceAll("[&\\s]", "_");
+        String result = name.toLowerCase().replaceAll("[&\\s()=:]", "_");
         if (result.endsWith("]")) {
             result = result.replace("[", ".").substring(0, result.length() - 1);
         }

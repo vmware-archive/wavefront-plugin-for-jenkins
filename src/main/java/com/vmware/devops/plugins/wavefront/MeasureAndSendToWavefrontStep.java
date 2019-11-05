@@ -144,7 +144,7 @@ public class MeasureAndSendToWavefrontStep extends Step {
                 LOGGER.log(Level.FINE, "wavefrontTimedCall method has no parameter");
                 return "null";
             }
-            return name.toLowerCase().replaceAll("[&\\s\\.]", "_");
+            return name.toLowerCase().replaceAll("[&\\s\\.()=:]", "_");
         }
     }
 
