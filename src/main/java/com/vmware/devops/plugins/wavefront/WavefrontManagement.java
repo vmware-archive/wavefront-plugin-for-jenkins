@@ -68,6 +68,8 @@ public class WavefrontManagement extends ManagementLink implements StaplerProxy,
     private int flushInterval = DEFAULT_FLUSH_INTERVAL;
     private String metricsPrefixName = DEFAULT_METRICS_PREFIX_NAME;
     private String jobMetricsPrefixName = DEFAULT_JOB_METRICS_PREFIX_NAME;
+    private boolean enableSendingJunitReportDataForAllJobs = false;
+    private boolean enableSendingJacocoReportDataForAllJobs = false;
 
     private static String VALIDATION_SUCCESS = "Success";
     private static String INVALID_PORT_ERROR_MESSAGE = "Invalid port specified. Range must be 0-65535";
@@ -150,6 +152,8 @@ public class WavefrontManagement extends ManagementLink implements StaplerProxy,
         setFlushInterval(flushInterval);
         setMetricsPrefixName(sanitizeMetricCategory(form.getString("metricsPrefixName")));
         setJobMetricsPrefixName(sanitizeMetricCategory(form.getString("jobMetricsPrefixName")));
+        setEnableSendingJunitReportDataForAllJobs(form.getBoolean("enableSendingJunitReportDataForAllJobs"));
+        setEnableSendingJacocoReportDataForAllJobs(form.getBoolean("enableSendingJacocoReportDataForAllJobs"));
         rsp.sendRedirect(".");
         save();
     }
@@ -218,6 +222,22 @@ public class WavefrontManagement extends ManagementLink implements StaplerProxy,
         this.jobMetricsPrefixName = jobMetricsPrefixName;
     }
 
+    public boolean isEnableSendingJunitReportDataForAllJobs() {
+        return enableSendingJunitReportDataForAllJobs;
+    }
+
+    public void setEnableSendingJunitReportDataForAllJobs(boolean enableSendingJunitReportDataForAllJobs) {
+        this.enableSendingJunitReportDataForAllJobs = enableSendingJunitReportDataForAllJobs;
+    }
+
+    public boolean isEnableSendingJacocoReportDataForAllJobs() {
+        return enableSendingJacocoReportDataForAllJobs;
+    }
+
+    public void setEnableSendingJacocoReportDataForAllJobs(boolean enableSendingJacocoReportDataForAllJobs) {
+        this.enableSendingJacocoReportDataForAllJobs = enableSendingJacocoReportDataForAllJobs;
+    }
+
     /**
      * Descriptor is only used for UI form bindings.
      */
@@ -281,12 +301,14 @@ public class WavefrontManagement extends ManagementLink implements StaplerProxy,
                 flushInterval == that.flushInterval &&
                 Objects.equals(proxyHostname, that.proxyHostname) &&
                 Objects.equals(metricsPrefixName, that.metricsPrefixName) &&
-                Objects.equals(jobMetricsPrefixName, that.jobMetricsPrefixName);
+                Objects.equals(jobMetricsPrefixName, that.jobMetricsPrefixName) &&
+                enableSendingJunitReportDataForAllJobs == that.enableSendingJunitReportDataForAllJobs &&
+                enableSendingJacocoReportDataForAllJobs == that.enableSendingJacocoReportDataForAllJobs;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(proxyHostname, proxyPort, flushInterval, metricsPrefixName, jobMetricsPrefixName);
+        return Objects.hash(proxyHostname, proxyPort, flushInterval, metricsPrefixName, jobMetricsPrefixName, enableSendingJunitReportDataForAllJobs, enableSendingJacocoReportDataForAllJobs);
     }
 
     @Override
@@ -297,6 +319,9 @@ public class WavefrontManagement extends ManagementLink implements StaplerProxy,
                 ", flushInterval=" + flushInterval +
                 ", metricsPrefixName='" + metricsPrefixName + '\'' +
                 ", jobMetricsPrefixName='" + jobMetricsPrefixName + '\'' +
+                ", enableSendingJunitReportDataForAllJobs=" + enableSendingJunitReportDataForAllJobs +
+                ", enableSendingJacocoReportDataForAllJobs=" + enableSendingJacocoReportDataForAllJobs +
                 '}';
     }
+
 }

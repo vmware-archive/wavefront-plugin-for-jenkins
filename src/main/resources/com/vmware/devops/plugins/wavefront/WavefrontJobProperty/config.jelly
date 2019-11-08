@@ -3,10 +3,10 @@
          xmlns:t="/lib/hudson" xmlns:f="/lib/form">
 
     <f:section title="Wavefront Settings">
-        <f:entry title="Enable sending junit reports for this job" field="enableSendingJunitReportData">
+        <f:entry title="Enable sending JUnit reports for this job" field="enableSendingJunitReportData">
             <f:checkbox/>
         </f:entry>
-        <f:entry title="Enable sending jacoco code coverage reports for this job" field="enableSendingJacocoReportData">
+        <f:entry title="Enable sending Jacoco code coverage reports for this job" field="enableSendingJacocoReportData">
             <f:checkbox/>
         </f:entry>
     </f:section>

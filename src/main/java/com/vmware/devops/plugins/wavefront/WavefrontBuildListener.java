@@ -90,10 +90,10 @@ public class WavefrontBuildListener extends RunListener<Run> {
                     sendPipelineMetricsToWavefront((WorkflowRun) run);
                 }
                 WavefrontJobProperty junitReportProperty = (WavefrontJobProperty) run.getParent().getProperty(WavefrontJobProperty.class);
-                if (junitReportProperty != null && junitReportProperty.isEnableSendingJunitReportData()) {
+                if (wfManagement.isEnableSendingJunitReportDataForAllJobs() || (junitReportProperty != null && junitReportProperty.isEnableSendingJunitReportData())) {
                     sendJunitReportMetricsToWavefront(run);
                 }
-                if (junitReportProperty != null && junitReportProperty.isEnableSendingJacocoReportData()) {
+                if (wfManagement.isEnableSendingJacocoReportDataForAllJobs() || (junitReportProperty != null && junitReportProperty.isEnableSendingJacocoReportData())) {
                     sendJacocoReportMetricsToWavefront(run);
                 }
 
