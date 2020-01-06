@@ -4,12 +4,6 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.vmware.devops</groupId>
-    <artifactId>wavefront-plugin-for-jenkins</artifactId>
-    <version>0.0.9-SNAPSHOT</version>
-    <packaging>hpi</packaging>
-
-
     <parent>
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>plugin</artifactId>
@@ -17,6 +11,20 @@
         <relativePath/>
     </parent>
 
+    <groupId>com.vmware.devops</groupId>
+    <artifactId>wavefront-plugin-for-jenkins</artifactId>
+    <version>0.0.9-SNAPSHOT</version>
+    <packaging>hpi</packaging>
+
+    <name>Wavefront Plugin for Jenkins</name>
+    <description>Plugin for sending data for Jenkins to Wavefront</description>
+    <licenses>
+        <license>
+            <name>MIT License</name>
+            <url>https://opensource.org/licenses/MIT</url>
+        </license>
+    </licenses>
+    
     <properties>
         <jenkins.version>2.172</jenkins.version>
         <java.level>8</java.level>
