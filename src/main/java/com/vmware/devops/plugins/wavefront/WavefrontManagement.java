@@ -60,8 +60,8 @@ public class WavefrontManagement extends ManagementLink implements StaplerProxy,
     private static final String DEFAULT_PROXY_HOSTNAME = "";
     private static final int DEFAULT_PROXY_PORT = 2878;
     private static final int DEFAULT_FLUSH_INTERVAL = 5;
-    private static final String DEFAULT_METRICS_PREFIX_NAME = "wavefront.jenkins.plugin";
-    private static final String DEFAULT_JOB_METRICS_PREFIX_NAME = "wavefront.jenkins.plugin.job";
+    private static final String DEFAULT_METRICS_PREFIX_NAME = "wjp";
+    private static final String DEFAULT_JOB_METRICS_PREFIX_NAME = "wjp.job";
 
     private String proxyHostname = DEFAULT_PROXY_HOSTNAME;
     private int proxyPort = DEFAULT_PROXY_PORT;

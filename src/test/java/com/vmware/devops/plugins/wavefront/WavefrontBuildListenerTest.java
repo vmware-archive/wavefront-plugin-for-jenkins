@@ -91,9 +91,9 @@ public class WavefrontBuildListenerTest {
     @Test
     public void testSendingMetricsFromJob() throws IOException, InterruptedException {
         List<String> expected = new ArrayList<>(Arrays.asList(
-                "wavefront.jenkins.plugin.job.test_job 3000.0 source=localhost Status=SUCCESS Build-Number=1",
-                "wavefront.jenkins.plugin.job.test_job2 4000.0 source=localhost Status=FAILURE Build-Number=2",
-                "wavefront.jenkins.plugin.job.test-job3 15000.0 source=localhost Status=ABORTED Build-Number=33"
+                "wjp.job.test_job 3000.0 source=localhost Status=SUCCESS Build-Number=1",
+                "wjp.job.test_job2 4000.0 source=localhost Status=FAILURE Build-Number=2",
+                "wjp.job.test-job3 15000.0 source=localhost Status=ABORTED Build-Number=33"
         ));
         Run run = getRun();
         WavefrontBuildListener buildLister = new WavefrontBuildListener();
@@ -111,14 +111,14 @@ public class WavefrontBuildListenerTest {
     @Test
     public void testSendingMetricsFromPipelineStages() throws Exception {
         List<String> expected = new ArrayList<>(Arrays.asList(
-                "wavefront.jenkins.plugin.job.test_pipeline",
-                "wavefront.jenkins.plugin.job.test_pipeline.stage.testing_stage1",
-                "wavefront.jenkins.plugin.job.test_pipeline.stage.testing_stage2",
-                "wavefront.jenkins.plugin.job.test_pipeline.parallel.thread-1",
-                "wavefront.jenkins.plugin.job.test_pipeline.parallel.thread-2",
-                "wavefront.jenkins.plugin.job.test_pipeline.stage.last_stage",
-                "wavefront.jenkins.plugin.job.step.metricname1",
-                "wavefront.jenkins.plugin.job.step.metricname2"
+                "wjp.job.test_pipeline",
+                "wjp.job.test_pipeline.stage.testing_stage1",
+                "wjp.job.test_pipeline.stage.testing_stage2",
+                "wjp.job.test_pipeline.parallel.thread-1",
+                "wjp.job.test_pipeline.parallel.thread-2",
+                "wjp.job.test_pipeline.stage.last_stage",
+                "wjp.job.step.metricname1",
+                "wjp.job.step.metricname2"
 
         ));
 
@@ -159,11 +159,11 @@ public class WavefrontBuildListenerTest {
     @Test
     public void testWavefrontJobPropertyForPipelineFailedTests() throws IOException, InterruptedException {
         List<String> expected = new ArrayList<>(Arrays.asList(
-                "wavefront.jenkins.plugin.job.job-with-test-reports 20000.0 source=localhost Status=FAILURE Build-Number=1",
-                "wavefront.jenkins.plugin.job.junit.job-with-test-reports 127000.0 source=localhost",
-                "wavefront.jenkins.plugin.job.junit.test.java.com.vmware.devops.wavefront.testingsendingmetricsfailedtest" +
+                "wjp.job.job-with-test-reports 20000.0 source=localhost Status=FAILURE Build-Number=1",
+                "wjp.job.junit.job-with-test-reports 127000.0 source=localhost",
+                "wjp.job.junit.test.java.com.vmware.devops.wavefront.testingsendingmetricsfailedtest" +
                         " 7000.0 source=localhost Build-Number=1 Job-Name=job-with-test-reports Test-Status=Failed",
-                "wavefront.jenkins.plugin.job.junit.test.java.com.vmware.devops.wavefront.testingsendingmetricsfailedtest2" +
+                "wjp.job.junit.test.java.com.vmware.devops.wavefront.testingsendingmetricsfailedtest2" +
                         " 120000.0 source=localhost Build-Number=1 Job-Name=job-with-test-reports Test-Status=Failed"
 
         ));
@@ -189,11 +189,11 @@ public class WavefrontBuildListenerTest {
     @Test
     public void testWavefrontJobPropertyForPipelineSkippedAndPassedTests() throws IOException, InterruptedException {
         List<String> expected = new ArrayList<>(Arrays.asList(
-                "wavefront.jenkins.plugin.job.job-with-test-reports 20000.0 source=localhost Status=SUCCESS Build-Number=1",
-                "wavefront.jenkins.plugin.job.junit.job-with-test-reports 14000.0 source=localhost",
-                "wavefront.jenkins.plugin.job.junit.test.java.com.vmware.devops.wavefront.testingsendingmetricsskippedtest" +
+                "wjp.job.job-with-test-reports 20000.0 source=localhost Status=SUCCESS Build-Number=1",
+                "wjp.job.junit.job-with-test-reports 14000.0 source=localhost",
+                "wjp.job.junit.test.java.com.vmware.devops.wavefront.testingsendingmetricsskippedtest" +
                         " 7000.0 source=localhost Build-Number=1 Job-Name=job-with-test-reports Test-Status=Skipped",
-                "wavefront.jenkins.plugin.job.junit.test.java.com.vmware.devops.wavefront.testingsendingmetricspassedtest" +
+                "wjp.job.junit.test.java.com.vmware.devops.wavefront.testingsendingmetricspassedtest" +
                         " 7000.0 source=localhost Build-Number=1 Job-Name=job-with-test-reports Test-Status=Passed"
 
         ));
@@ -220,37 +220,37 @@ public class WavefrontBuildListenerTest {
     @Test
     public void testWavefrontJacocoDataSending() throws IOException, InterruptedException {
         List<String> expected = new ArrayList<>(Arrays.asList(
-                "wavefront.jenkins.plugin.job.job-with-jacoco-metrics 20000.0 source=localhost Status=SUCCESS Build-Number=1",
-                "wavefront.jenkins.plugin.job.job-with-jacoco-metrics.jacoco.instructions-coverage 85.0 source=localhost Status=SUCCESS Build-Number=1",
-                "wavefront.jenkins.plugin.job.job-with-jacoco-metrics.jacoco.branch-coverage 85.0 source=localhost Status=SUCCESS Build-Number=1",
-                "wavefront.jenkins.plugin.job.job-with-jacoco-metrics.jacoco.complexity-coverage 85.0 source=localhost Status=SUCCESS Build-Number=1",
-                "wavefront.jenkins.plugin.job.job-with-jacoco-metrics.jacoco.line-coverage 85.0 source=localhost Status=SUCCESS Build-Number=1",
-                "wavefront.jenkins.plugin.job.job-with-jacoco-metrics.jacoco.method-coverage 85.0 source=localhost Status=SUCCESS Build-Number=1",
-                "wavefront.jenkins.plugin.job.job-with-jacoco-metrics.jacoco.class-coverage 85.0 source=localhost Status=SUCCESS Build-Number=1",
-                "wavefront.jenkins.plugin.job.job-with-jacoco-metrics.jacoco.instructions-coverage.minimum 50.0 source=localhost Status=SUCCESS Build-Number=1",
-                "wavefront.jenkins.plugin.job.job-with-jacoco-metrics.jacoco.branch-coverage.minimum 60.0 source=localhost Status=SUCCESS Build-Number=1",
-                "wavefront.jenkins.plugin.job.job-with-jacoco-metrics.jacoco.complexity-coverage.minimum 70.0 source=localhost Status=SUCCESS Build-Number=1",
-                "wavefront.jenkins.plugin.job.job-with-jacoco-metrics.jacoco.line-coverage.minimum 80.0 source=localhost Status=SUCCESS Build-Number=1",
-                "wavefront.jenkins.plugin.job.job-with-jacoco-metrics.jacoco.method-coverage.minimum 80.0 source=localhost Status=SUCCESS Build-Number=1",
-                "wavefront.jenkins.plugin.job.job-with-jacoco-metrics.jacoco.class-coverage.minimum 80.0 source=localhost Status=SUCCESS Build-Number=1",
-                "wavefront.jenkins.plugin.job.job-with-jacoco-metrics.jacoco.instructions-coverage.maximum 100.0 source=localhost Status=SUCCESS Build-Number=1",
-                "wavefront.jenkins.plugin.job.job-with-jacoco-metrics.jacoco.branch-coverage.maximum 100.0 source=localhost Status=SUCCESS Build-Number=1",
-                "wavefront.jenkins.plugin.job.job-with-jacoco-metrics.jacoco.complexity-coverage.maximum 100.0 source=localhost Status=SUCCESS Build-Number=1",
-                "wavefront.jenkins.plugin.job.job-with-jacoco-metrics.jacoco.line-coverage.maximum 100.0 source=localhost Status=SUCCESS Build-Number=1",
-                "wavefront.jenkins.plugin.job.job-with-jacoco-metrics.jacoco.method-coverage.maximum 100.0 source=localhost Status=SUCCESS Build-Number=1",
-                "wavefront.jenkins.plugin.job.job-with-jacoco-metrics.jacoco.class-coverage.maximum 100.0 source=localhost Status=SUCCESS Build-Number=1",
-                "wavefront.jenkins.plugin.job.job-with-jacoco-metrics.jacoco.instructions-coverage.covered 0.0 source=localhost Status=SUCCESS Build-Number=1",
-                "wavefront.jenkins.plugin.job.job-with-jacoco-metrics.jacoco.branch-coverage.covered 0.0 source=localhost Status=SUCCESS Build-Number=1",
-                "wavefront.jenkins.plugin.job.job-with-jacoco-metrics.jacoco.complexity-coverage.covered 0.0 source=localhost Status=SUCCESS Build-Number=1",
-                "wavefront.jenkins.plugin.job.job-with-jacoco-metrics.jacoco.line-coverage.covered 0.0 source=localhost Status=SUCCESS Build-Number=1",
-                "wavefront.jenkins.plugin.job.job-with-jacoco-metrics.jacoco.method-coverage.covered 0.0 source=localhost Status=SUCCESS Build-Number=1",
-                "wavefront.jenkins.plugin.job.job-with-jacoco-metrics.jacoco.class-coverage.covered 0.0 source=localhost Status=SUCCESS Build-Number=1",
-                "wavefront.jenkins.plugin.job.job-with-jacoco-metrics.jacoco.instructions-coverage.total 0.0 source=localhost Status=SUCCESS Build-Number=1",
-                "wavefront.jenkins.plugin.job.job-with-jacoco-metrics.jacoco.branch-coverage.total 0.0 source=localhost Status=SUCCESS Build-Number=1",
-                "wavefront.jenkins.plugin.job.job-with-jacoco-metrics.jacoco.complexity-coverage.total 0.0 source=localhost Status=SUCCESS Build-Number=1",
-                "wavefront.jenkins.plugin.job.job-with-jacoco-metrics.jacoco.line-coverage.total 0.0 source=localhost Status=SUCCESS Build-Number=1",
-                "wavefront.jenkins.plugin.job.job-with-jacoco-metrics.jacoco.method-coverage.total 0.0 source=localhost Status=SUCCESS Build-Number=1",
-                "wavefront.jenkins.plugin.job.job-with-jacoco-metrics.jacoco.class-coverage.total 0.0 source=localhost Status=SUCCESS Build-Number=1"
+                "wjp.job.job-with-jacoco-metrics 20000.0 source=localhost Status=SUCCESS Build-Number=1",
+                "wjp.job.job-with-jacoco-metrics.jacoco.instructions-coverage 85.0 source=localhost Status=SUCCESS Build-Number=1",
+                "wjp.job.job-with-jacoco-metrics.jacoco.branch-coverage 85.0 source=localhost Status=SUCCESS Build-Number=1",
+                "wjp.job.job-with-jacoco-metrics.jacoco.complexity-coverage 85.0 source=localhost Status=SUCCESS Build-Number=1",
+                "wjp.job.job-with-jacoco-metrics.jacoco.line-coverage 85.0 source=localhost Status=SUCCESS Build-Number=1",
+                "wjp.job.job-with-jacoco-metrics.jacoco.method-coverage 85.0 source=localhost Status=SUCCESS Build-Number=1",
+                "wjp.job.job-with-jacoco-metrics.jacoco.class-coverage 85.0 source=localhost Status=SUCCESS Build-Number=1",
+                "wjp.job.job-with-jacoco-metrics.jacoco.instructions-coverage.minimum 50.0 source=localhost Status=SUCCESS Build-Number=1",
+                "wjp.job.job-with-jacoco-metrics.jacoco.branch-coverage.minimum 60.0 source=localhost Status=SUCCESS Build-Number=1",
+                "wjp.job.job-with-jacoco-metrics.jacoco.complexity-coverage.minimum 70.0 source=localhost Status=SUCCESS Build-Number=1",
+                "wjp.job.job-with-jacoco-metrics.jacoco.line-coverage.minimum 80.0 source=localhost Status=SUCCESS Build-Number=1",
+                "wjp.job.job-with-jacoco-metrics.jacoco.method-coverage.minimum 80.0 source=localhost Status=SUCCESS Build-Number=1",
+                "wjp.job.job-with-jacoco-metrics.jacoco.class-coverage.minimum 80.0 source=localhost Status=SUCCESS Build-Number=1",
+                "wjp.job.job-with-jacoco-metrics.jacoco.instructions-coverage.maximum 100.0 source=localhost Status=SUCCESS Build-Number=1",
+                "wjp.job.job-with-jacoco-metrics.jacoco.branch-coverage.maximum 100.0 source=localhost Status=SUCCESS Build-Number=1",
+                "wjp.job.job-with-jacoco-metrics.jacoco.complexity-coverage.maximum 100.0 source=localhost Status=SUCCESS Build-Number=1",
+                "wjp.job.job-with-jacoco-metrics.jacoco.line-coverage.maximum 100.0 source=localhost Status=SUCCESS Build-Number=1",
+                "wjp.job.job-with-jacoco-metrics.jacoco.method-coverage.maximum 100.0 source=localhost Status=SUCCESS Build-Number=1",
+                "wjp.job.job-with-jacoco-metrics.jacoco.class-coverage.maximum 100.0 source=localhost Status=SUCCESS Build-Number=1",
+                "wjp.job.job-with-jacoco-metrics.jacoco.instructions-coverage.covered 0.0 source=localhost Status=SUCCESS Build-Number=1",
+                "wjp.job.job-with-jacoco-metrics.jacoco.branch-coverage.covered 0.0 source=localhost Status=SUCCESS Build-Number=1",
+                "wjp.job.job-with-jacoco-metrics.jacoco.complexity-coverage.covered 0.0 source=localhost Status=SUCCESS Build-Number=1",
+                "wjp.job.job-with-jacoco-metrics.jacoco.line-coverage.covered 0.0 source=localhost Status=SUCCESS Build-Number=1",
+                "wjp.job.job-with-jacoco-metrics.jacoco.method-coverage.covered 0.0 source=localhost Status=SUCCESS Build-Number=1",
+                "wjp.job.job-with-jacoco-metrics.jacoco.class-coverage.covered 0.0 source=localhost Status=SUCCESS Build-Number=1",
+                "wjp.job.job-with-jacoco-metrics.jacoco.instructions-coverage.total 0.0 source=localhost Status=SUCCESS Build-Number=1",
+                "wjp.job.job-with-jacoco-metrics.jacoco.branch-coverage.total 0.0 source=localhost Status=SUCCESS Build-Number=1",
+                "wjp.job.job-with-jacoco-metrics.jacoco.complexity-coverage.total 0.0 source=localhost Status=SUCCESS Build-Number=1",
+                "wjp.job.job-with-jacoco-metrics.jacoco.line-coverage.total 0.0 source=localhost Status=SUCCESS Build-Number=1",
+                "wjp.job.job-with-jacoco-metrics.jacoco.method-coverage.total 0.0 source=localhost Status=SUCCESS Build-Number=1",
+                "wjp.job.job-with-jacoco-metrics.jacoco.class-coverage.total 0.0 source=localhost Status=SUCCESS Build-Number=1"
 
         ));
 

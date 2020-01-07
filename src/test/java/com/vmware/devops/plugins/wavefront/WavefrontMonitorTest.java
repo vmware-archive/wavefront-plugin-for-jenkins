@@ -71,11 +71,11 @@ public class WavefrontMonitorTest {
         List<String> messages = proxy.terminate();
         Set<String> metricsNames = parseMessages(messages);
         List<String> expected = new ArrayList<>(Arrays.asList(
-                "wavefront.jenkins.plugin.system-cpu",
-                "wavefront.jenkins.plugin.total-physical-memory",
-                "wavefront.jenkins.plugin.free-physical-memory",
-                "wavefront.jenkins.plugin.max-heap-memory",
-                "wavefront.jenkins.plugin.used-heap-memory"
+                "wjp.system-cpu",
+                "wjp.total-physical-memory",
+                "wjp.free-physical-memory",
+                "wjp.max-heap-memory",
+                "wjp.used-heap-memory"
         ));
         boolean result = metricsNames.containsAll(expected);
         if (!result) {
@@ -95,13 +95,13 @@ public class WavefrontMonitorTest {
         List<String> messages = proxy.terminate();
         Set<String> metricsNames = parseMessages(messages);
         List<String> expected = new ArrayList<>(Arrays.asList(
-                "wavefront.jenkins.plugin.label.master.available-executors",
-                "wavefront.jenkins.plugin.label.master.busy-executors",
-                "wavefront.jenkins.plugin.label.master.connecting-executors",
-                "wavefront.jenkins.plugin.label.master.defined-executors",
-                "wavefront.jenkins.plugin.label.master.idle-executors",
-                "wavefront.jenkins.plugin.label.master.online-executors",
-                "wavefront.jenkins.plugin.label.master.queue-length"
+                "wjp.label.master.available-executors",
+                "wjp.label.master.busy-executors",
+                "wjp.label.master.connecting-executors",
+                "wjp.label.master.defined-executors",
+                "wjp.label.master.idle-executors",
+                "wjp.label.master.online-executors",
+                "wjp.label.master.queue-length"
         ));
         boolean result = metricsNames.containsAll(expected);
         if (!result) {
@@ -121,18 +121,18 @@ public class WavefrontMonitorTest {
         List<String> messages = proxy.terminate();
         Set<String> metricsNames = parseMessages(messages);
         List<String> expected = new ArrayList<>(Arrays.asList(
-                "wavefront.jenkins.plugin.system-cpu",
-                "wavefront.jenkins.plugin.total-physical-memory",
-                "wavefront.jenkins.plugin.free-physical-memory",
-                "wavefront.jenkins.plugin.max-heap-memory",
-                "wavefront.jenkins.plugin.used-heap-memory",
-                "wavefront.jenkins.plugin.label.master.available-executors",
-                "wavefront.jenkins.plugin.label.master.busy-executors",
-                "wavefront.jenkins.plugin.label.master.connecting-executors",
-                "wavefront.jenkins.plugin.label.master.defined-executors",
-                "wavefront.jenkins.plugin.label.master.idle-executors",
-                "wavefront.jenkins.plugin.label.master.online-executors",
-                "wavefront.jenkins.plugin.label.master.queue-length"
+                "wjp.system-cpu",
+                "wjp.total-physical-memory",
+                "wjp.free-physical-memory",
+                "wjp.max-heap-memory",
+                "wjp.used-heap-memory",
+                "wjp.label.master.available-executors",
+                "wjp.label.master.busy-executors",
+                "wjp.label.master.connecting-executors",
+                "wjp.label.master.defined-executors",
+                "wjp.label.master.idle-executors",
+                "wjp.label.master.online-executors",
+                "wjp.label.master.queue-length"
         ));
         boolean result = metricsNames.containsAll(expected);
         if (!result) {
