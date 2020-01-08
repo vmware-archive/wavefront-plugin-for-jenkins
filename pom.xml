@@ -12,11 +12,11 @@
     </parent>
 
     <groupId>com.vmware.devops</groupId>
-    <artifactId>wavefront-plugin-for-jenkins</artifactId>
+    <artifactId>wavefront</artifactId>
     <version>0.0.9-SNAPSHOT</version>
     <packaging>hpi</packaging>
 
-    <name>Wavefront Plugin for Jenkins</name>
+    <name>Wavefront Plugin</name>
     <description>Plugin for sending data for Jenkins to Wavefront</description>
     <licenses>
         <license>

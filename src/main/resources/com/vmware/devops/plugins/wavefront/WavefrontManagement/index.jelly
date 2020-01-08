@@ -13,19 +13,19 @@
 
                 <f:section title="Wavefront proxy configuration">
                     <f:entry title="${%Proxy hostname}" field="proxyHostname"
-                             help="/plugin/wavefront-plugin-for-jenkins/help-proxyHostnameConfig.html">
+                             help="/plugin/wavefront/help-proxyHostnameConfig.html">
                         <f:textbox field="proxyHostname"
                                    value="${it.proxyHostname}"/>
                     </f:entry>
 
                     <f:entry title="${%Proxy port}" field="proxyPort"
-                             help="/plugin/wavefront-plugin-for-jenkins/help-proxyPortConfig.html">
+                             help="/plugin/wavefront/help-proxyPortConfig.html">
                         <f:number field="proxyPort"
                                   value="${it.proxyPort}"/>
                     </f:entry>
 
                     <f:entry title="${%Flush Interval}" field="flushInterval"
-                             help="/plugin/wavefront-plugin-for-jenkins/help-flushIntervalConfig.html">
+                             help="/plugin/wavefront/help-flushIntervalConfig.html">
                         <f:number field="flushInterval"
                                   value="${it.flushInterval}"/>
                     </f:entry>
@@ -37,13 +37,13 @@
 
                 <f:section title="Wavefront metrics name configuration">
                     <f:entry title="${%Metrics name prefix}" field="metricsPrefixName"
-                             help="/plugin/wavefront-plugin-for-jenkins/help-metricsPrefixName.html">
+                             help="/plugin/wavefront/help-metricsPrefixName.html">
                         <f:textbox field="metricsPrefixName"
                                    value="${it.metricsPrefixName}"/>
                     </f:entry>
 
                     <f:entry title="${%Job metrics name prefix}" field="jobMetricsPrefixName"
-                             help="/plugin/wavefront-plugin-for-jenkins/help-jobMetricsPrefixName.html">
+                             help="/plugin/wavefront/help-jobMetricsPrefixName.html">
                         <f:textbox field="jobMetricsPrefixName"
                                    value="${it.jobMetricsPrefixName}"/>
                     </f:entry>

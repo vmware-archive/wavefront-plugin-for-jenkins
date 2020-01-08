@@ -96,7 +96,7 @@ public class WavefrontManagement extends ManagementLink implements StaplerProxy,
 
     @Override
     public String getIconFileName() {
-        return "/plugin/wavefront-plugin-for-jenkins/images/icon.png";
+        return "/plugin/wavefront/images/icon.png";
     }
 
     @Override
