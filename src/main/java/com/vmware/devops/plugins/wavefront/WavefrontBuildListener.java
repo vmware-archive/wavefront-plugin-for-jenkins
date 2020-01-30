@@ -315,19 +315,25 @@ public class WavefrontBuildListener extends RunListener<Run> {
 
     private void sendMetricsToWavefront(String jobName, double metricValue, Map<String, String> tags) throws IOException {
         String name = wfManagement.getJobMetricsPrefixName() + "." + jobName;
+        if (name.length() >= 255) {
+            LOGGER.log(Level.WARNING, "The metric has not been sent to wavefront, name is too long: " + name);
+        }
         WavefrontMonitor.getWavefrontSender().sendMetric(name, metricValue, System.currentTimeMillis(),
                 wfManagement.getProxyHostname(), tags);
     }
 
     private String sanitizeMetricCategory(String name) {
-        return name.toLowerCase().replaceAll("[&\\s\\.()=:]", "_");
+        return name.toLowerCase().replaceAll("[^a-z0-9_-]", "_");
     }
 
     private String sanitizeJUnitTestMetricCategory(String name) {
-        String result = name.toLowerCase().replaceAll("[&\\s()=:]", "_");
-        if (result.endsWith("]")) {
-            result = result.replace("[", ".").substring(0, result.length() - 1);
+        if (name.endsWith("]")) {
+            name = name
+                    .replace("[", ".")
+                    .substring(0, name.length() - 1)
+                    .replaceAll("(\\.)\\1+", ".");
         }
+        String result = name.toLowerCase().replaceAll("[^a-z0-9_\\.-]", "_");
         return result;
     }
 

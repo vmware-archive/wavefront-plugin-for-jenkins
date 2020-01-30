@@ -47,6 +47,7 @@ public class WavefrontMonitorTest {
     private static String LOCALHOST = "localhost";
     private MockWavefrontProxy proxy;
     private int port;
+    private String metricPrefix;
 
     @Rule
     public JenkinsRule jenkinsRule = new JenkinsRule();
@@ -61,6 +62,7 @@ public class WavefrontMonitorTest {
         form.getInputByName("_.proxyPort").setValueAttribute(String.valueOf(port));
         jenkinsRule.submit(form);
         WavefrontMonitor.getInstance().setWavefrontSenderClosed(true);
+        metricPrefix = WavefrontManagement.get().getMetricsPrefixName();
     }
 
     @Test
@@ -71,11 +73,11 @@ public class WavefrontMonitorTest {
         List<String> messages = proxy.terminate();
         Set<String> metricsNames = parseMessages(messages);
         List<String> expected = new ArrayList<>(Arrays.asList(
-                "wjp.system-cpu",
-                "wjp.total-physical-memory",
-                "wjp.free-physical-memory",
-                "wjp.max-heap-memory",
-                "wjp.used-heap-memory"
+                metricPrefix + ".system-cpu",
+                metricPrefix + ".total-physical-memory",
+                metricPrefix + ".free-physical-memory",
+                metricPrefix + ".max-heap-memory",
+                metricPrefix + ".used-heap-memory"
         ));
         boolean result = metricsNames.containsAll(expected);
         if (!result) {
@@ -95,13 +97,13 @@ public class WavefrontMonitorTest {
         List<String> messages = proxy.terminate();
         Set<String> metricsNames = parseMessages(messages);
         List<String> expected = new ArrayList<>(Arrays.asList(
-                "wjp.label.master.available-executors",
-                "wjp.label.master.busy-executors",
-                "wjp.label.master.connecting-executors",
-                "wjp.label.master.defined-executors",
-                "wjp.label.master.idle-executors",
-                "wjp.label.master.online-executors",
-                "wjp.label.master.queue-length"
+                metricPrefix + ".label.master.available-executors",
+                metricPrefix + ".label.master.busy-executors",
+                metricPrefix + ".label.master.connecting-executors",
+                metricPrefix + ".label.master.defined-executors",
+                metricPrefix + ".label.master.idle-executors",
+                metricPrefix + ".label.master.online-executors",
+                metricPrefix + ".label.master.queue-length"
         ));
         boolean result = metricsNames.containsAll(expected);
         if (!result) {
@@ -121,18 +123,18 @@ public class WavefrontMonitorTest {
         List<String> messages = proxy.terminate();
         Set<String> metricsNames = parseMessages(messages);
         List<String> expected = new ArrayList<>(Arrays.asList(
-                "wjp.system-cpu",
-                "wjp.total-physical-memory",
-                "wjp.free-physical-memory",
-                "wjp.max-heap-memory",
-                "wjp.used-heap-memory",
-                "wjp.label.master.available-executors",
-                "wjp.label.master.busy-executors",
-                "wjp.label.master.connecting-executors",
-                "wjp.label.master.defined-executors",
-                "wjp.label.master.idle-executors",
-                "wjp.label.master.online-executors",
-                "wjp.label.master.queue-length"
+                metricPrefix + ".system-cpu",
+                metricPrefix + ".total-physical-memory",
+                metricPrefix + ".free-physical-memory",
+                metricPrefix + ".max-heap-memory",
+                metricPrefix + ".used-heap-memory",
+                metricPrefix + ".label.master.available-executors",
+                metricPrefix + ".label.master.busy-executors",
+                metricPrefix + ".label.master.connecting-executors",
+                metricPrefix + ".label.master.defined-executors",
+                metricPrefix + ".label.master.idle-executors",
+                metricPrefix + ".label.master.online-executors",
+                metricPrefix + ".label.master.queue-length"
         ));
         boolean result = metricsNames.containsAll(expected);
         if (!result) {
