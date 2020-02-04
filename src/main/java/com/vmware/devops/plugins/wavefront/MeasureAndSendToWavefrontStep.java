@@ -41,6 +41,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
 import com.google.common.collect.ImmutableSet;
+import com.vmware.devops.plugins.wavefront.util.Sanitizer;
 
 import hudson.EnvVars;
 import hudson.Extension;
@@ -116,14 +117,14 @@ public class MeasureAndSendToWavefrontStep extends Step {
         @Override
         protected void finished(StepContext context) throws Exception {
             long durationMetricValue = System.currentTimeMillis() - startTime;
-            String jobName = context.get(Run.class).getParent().getName();
+            String jobName = Sanitizer.sanitizeStepMetricCategory(context.get(Run.class).getParent().getFullName());
             String buildNumber = String.valueOf(context.get(Run.class).getNumber());
 
             Map<String, String> tags = new HashMap<>();
             tags.put(JOB_NAME, jobName);
             tags.put(BUILD_NUMBER, buildNumber);
 
-            String sanitizedName = sanitizeMetricCategory(metricName);
+            String sanitizedName = Sanitizer.sanitizeStepMetricCategory(metricName);
             String metricName = "step." + sanitizedName;
 
             sendMetricsToWavefront(metricName, durationMetricValue, tags, WavefrontManagement.get().getProxyHostname());
@@ -137,14 +138,6 @@ public class MeasureAndSendToWavefrontStep extends Step {
             } catch (IOException e) {
                 LOGGER.log(Level.WARNING, "Failed to send metrics from wavefrontTimedCall step to Wavefront", e);
             }
-        }
-
-        private String sanitizeMetricCategory(String name) {
-            if (name == null || name.equals("")) {
-                LOGGER.log(Level.FINE, "wavefrontTimedCall method has no parameter");
-                return "null";
-            }
-            return name.toLowerCase().replaceAll("[^a-z0-9_-]", "_");
         }
     }
 

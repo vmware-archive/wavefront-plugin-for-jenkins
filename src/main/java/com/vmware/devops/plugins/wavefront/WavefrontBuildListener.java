@@ -48,6 +48,8 @@ import org.jenkinsci.plugins.workflow.graph.FlowGraphWalker;
 import org.jenkinsci.plugins.workflow.graph.FlowNode;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 
+import com.vmware.devops.plugins.wavefront.util.Sanitizer;
+
 import hudson.Extension;
 import hudson.model.Action;
 import hudson.model.Run;
@@ -72,7 +74,6 @@ public class WavefrontBuildListener extends RunListener<Run> {
     public WavefrontBuildListener() {
         wfManagement = WavefrontManagement.get();
     }
-
 
     /**
      * Called when a build is completed.
@@ -109,12 +110,12 @@ public class WavefrontBuildListener extends RunListener<Run> {
         tags.put(STATUS, run.getResult().toString());
         tags.put(BUILD_NUMBER, run.getId());
         long duration = run.getDuration();
-        String jobName = sanitizeMetricCategory(run.getParent().getName());
+        String jobName = Sanitizer.sanitizeMetricCategory(Sanitizer.getDecodeJobName(run.getParent().getFullName()));
         sendMetricsToWavefront(jobName, duration, tags);
     }
 
     private void sendPipelineMetricsToWavefront(WorkflowRun run) throws IOException {
-        String pipelineName = sanitizeMetricCategory(run.getParent().getName());
+        String pipelineName = Sanitizer.sanitizeMetricCategory(Sanitizer.getDecodeJobName(run.getParent().getFullName()));
         String buildNumber = run.getId();
 
         if (run.getExecution() != null) {
@@ -131,10 +132,10 @@ public class WavefrontBuildListener extends RunListener<Run> {
                             .addTag(BUILD_NUMBER, buildNumber);
 
                     if (isStageNode(node)) {
-                        flowNodeData.setNodeName(sanitizeMetricCategory(node.getDisplayName()));
+                        flowNodeData.setNodeName(Sanitizer.sanitizeMetricCategory(node.getDisplayName()));
                         sendStageMetricsData(pipelineName, flowNodeData);
                     } else if (hasParallelLabelAction(node)) {
-                        flowNodeData.setNodeName(sanitizeMetricCategory(node.getDisplayName().replaceFirst("Branch: ", "")));
+                        flowNodeData.setNodeName(Sanitizer.sanitizeMetricCategory(node.getDisplayName().replaceFirst("Branch: ", "")));
                         sendParallelMetricsData(pipelineName, flowNodeData);
                     }
                 }
@@ -225,7 +226,7 @@ public class WavefrontBuildListener extends RunListener<Run> {
     }
 
     private void sendJunitReportMetricsToWavefront(Run run) throws IOException {
-        String jobName = sanitizeMetricCategory(run.getParent().getName());
+        String jobName = Sanitizer.sanitizeMetricCategory(Sanitizer.getDecodeJobName(run.getParent().getFullName()));
         String buildNumber = run.getId();
 
         TestResultAction action = run.getAction(TestResultAction.class);
@@ -251,14 +252,14 @@ public class WavefrontBuildListener extends RunListener<Run> {
 
         for (TestResult testResult : testResults) {
             String fullTestName = testResult.getFullDisplayName();
-            String metricName = "junit." + sanitizeJUnitTestMetricCategory(fullTestName);
+            String metricName = "junit." + Sanitizer.sanitizeJUnitTestMetricCategory(fullTestName);
             double testDuration = testResult.getDuration() * 1000; // in milliseconds
             sendMetricsToWavefront(metricName, testDuration, tags);
         }
     }
 
     private void sendJacocoReportMetricsToWavefront(Run run) throws IOException {
-        String jobName = sanitizeMetricCategory(run.getParent().getName());
+        String jobName = Sanitizer.sanitizeMetricCategory(Sanitizer.getDecodeJobName(run.getParent().getFullName()));
         String buildNumber = run.getId();
 
         JacocoBuildAction action = run.getAction(JacocoBuildAction.class);
@@ -320,21 +321,6 @@ public class WavefrontBuildListener extends RunListener<Run> {
         }
         WavefrontMonitor.getWavefrontSender().sendMetric(name, metricValue, System.currentTimeMillis(),
                 wfManagement.getProxyHostname(), tags);
-    }
-
-    private String sanitizeMetricCategory(String name) {
-        return name.toLowerCase().replaceAll("[^a-z0-9_-]", "_");
-    }
-
-    private String sanitizeJUnitTestMetricCategory(String name) {
-        if (name.endsWith("]")) {
-            name = name
-                    .replace("[", ".")
-                    .substring(0, name.length() - 1)
-                    .replaceAll("(\\.)\\1+", ".");
-        }
-        String result = name.toLowerCase().replaceAll("[^a-z0-9_\\.-]", "_");
-        return result;
     }
 
     private WavefrontManagement getWavefrontManagement() {

@@ -39,6 +39,8 @@ import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 import org.kohsuke.stapler.interceptor.RequirePOST;
 
+import com.vmware.devops.plugins.wavefront.util.Sanitizer;
+
 import hudson.Extension;
 import hudson.XmlFile;
 import hudson.model.Describable;
@@ -150,8 +152,8 @@ public class WavefrontManagement extends ManagementLink implements StaplerProxy,
         setProxyHostname(form.getString("proxyHostname"));
         setProxyPort(proxyPort);
         setFlushInterval(flushInterval);
-        setMetricsPrefixName(sanitizeMetricCategory(form.getString("metricsPrefixName")));
-        setJobMetricsPrefixName(sanitizeMetricCategory(form.getString("jobMetricsPrefixName")));
+        setMetricsPrefixName(Sanitizer.sanitizeFullMetricCategory(form.getString("metricsPrefixName")));
+        setJobMetricsPrefixName(Sanitizer.sanitizeFullMetricCategory(form.getString("jobMetricsPrefixName")));
         setEnableSendingJunitReportDataForAllJobs(form.getBoolean("enableSendingJunitReportDataForAllJobs"));
         setEnableSendingJacocoReportDataForAllJobs(form.getBoolean("enableSendingJacocoReportDataForAllJobs"));
         rsp.sendRedirect(".");
@@ -263,10 +265,6 @@ public class WavefrontManagement extends ManagementLink implements StaplerProxy,
                 return FormValidation.error(INVALID_INPUT_ERROR_MESSAGE);
             }
         }
-    }
-
-    private String sanitizeMetricCategory(String name) {
-        return name.toLowerCase().replaceAll("[&\\s()=:]", "_");
     }
 
     @Override

@@ -335,7 +335,7 @@ public class WavefrontBuildListenerTest {
     }
 
     private void configureRun(Run run, String jobName, long duration, Result result, String buildNumber, boolean junitProperty, boolean jacocoProperty) {
-        when(run.getParent().getName()).thenReturn(jobName);
+        when(run.getParent().getFullName()).thenReturn(jobName);
         when(run.getDuration()).thenReturn(duration);
         when(run.getResult()).thenReturn(result);
         when(run.getId()).thenReturn(buildNumber);
