@@ -35,6 +35,7 @@ import hudson.model.Descriptor;
 import hudson.model.Job;
 import hudson.model.JobProperty;
 import hudson.model.JobPropertyDescriptor;
+
 import net.sf.json.JSONObject;
 
 public class WavefrontJobProperty<T extends Job<?, ?>> extends JobProperty<T> {
