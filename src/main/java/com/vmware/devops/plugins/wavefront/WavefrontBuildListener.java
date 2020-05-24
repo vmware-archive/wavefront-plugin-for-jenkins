@@ -231,9 +231,8 @@ public class WavefrontBuildListener extends RunListener<Run> {
 
         TestResultAction action = run.getAction(TestResultAction.class);
         if (action != null) {
-            String metricName = "junit." + jobName;
-            double fullDurationForTests = action.getResult().getDuration() * 1000;
-            sendMetricsToWavefront(metricName, fullDurationForTests, null); // send whole time required for tests
+
+            sendJobLevelJunitMetricsToWavefront(jobName, action);
 
             Map<String, String> tags = new HashMap<>();
             tags.put(JOB_NAME, jobName);
@@ -246,6 +245,26 @@ public class WavefrontBuildListener extends RunListener<Run> {
             tags.put(TEST_STATUS, PASSED);
             sendJUnitTestResultMetricsToWavefront(action.getResult().getPassedTests(), tags);
         }
+    }
+
+    private void sendJobLevelJunitMetricsToWavefront(String jobName, final TestResultAction action) throws IOException {
+        String jobMetricName = "junit." + jobName;
+        String countMetricName = "%s.%scount";
+        int skipped = action.getSkipCount();
+        int failed = action.getFailCount();
+        int total = action.getTotalCount();
+        int passed = total - (failed + skipped);
+
+        // Duration metric
+        double fullDurationForTests = action.getResult().getDuration() * 1000;
+        sendMetricsToWavefront(jobMetricName, fullDurationForTests, null); // send whole time required for tests
+
+        // Junit Tests Count metric
+        sendMetricsToWavefront(String.format(countMetricName, jobMetricName, "skip"), skipped, null);
+        sendMetricsToWavefront(String.format(countMetricName, jobMetricName, "fail"), failed, null);
+        sendMetricsToWavefront(String.format(countMetricName, jobMetricName, "total"), total, null);
+        sendMetricsToWavefront(String.format(countMetricName, jobMetricName, "pass"), passed, null);
+
     }
 
     private void sendJUnitTestResultMetricsToWavefront(Collection<? extends TestResult> testResults, Map<String, String> tags) throws IOException {

@@ -162,6 +162,10 @@ public class WavefrontBuildListenerTest {
         List<String> expected = new ArrayList<>(Arrays.asList(
                 jobMetricPrefix + ".job-with-test-reports 20000.0 source=localhost Status=FAILURE Build-Number=1",
                 jobMetricPrefix + ".junit.job-with-test-reports 127000.0 source=localhost",
+                jobMetricPrefix + ".junit.job-with-test-reports.failcount 10.0 source=localhost",
+                jobMetricPrefix + ".junit.job-with-test-reports.skipcount 10.0 source=localhost",
+                jobMetricPrefix + ".junit.job-with-test-reports.passcount 80.0 source=localhost",
+                jobMetricPrefix + ".junit.job-with-test-reports.totalcount 100.0 source=localhost",
                 jobMetricPrefix + ".junit.test.java.com.vmware.devops.wavefront.testingsendingmetricsfailedtest" +
                         " 7000.0 source=localhost Build-Number=1 Job-Name=job-with-test-reports Test-Status=Failed",
                 jobMetricPrefix + ".junit.test.java.com.vmware.devops.wavefront.testingsendingmetricsfailedtest2" +
@@ -176,6 +180,9 @@ public class WavefrontBuildListenerTest {
         TestResultAction action = mock(TestResultAction.class);
         when(action.getResult()).thenReturn(actionResult);
         when(actionResult.getFailedTests()).thenReturn(failedTests);
+        when(action.getSkipCount()).thenReturn(10);
+        when(action.getFailCount()).thenReturn(10);
+        when(action.getTotalCount()).thenReturn(100);
 
         Run run = getRun();
         when(run.getAction(TestResultAction.class)).thenReturn(action);
