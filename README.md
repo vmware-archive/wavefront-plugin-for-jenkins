@@ -67,14 +67,15 @@ You can set whether to send JUnit and Jacoco reports from the respective job pro
     * *wavefront.jenkins.plugin.job.jobname.parallel.branchname*
     
 5.	**JUnit report** – If it's enabled, duration (in milliseconds) for each JUnit test per job (not send by default, needs Jenkins JUnit plugin). Metric name: *\<job-metric-prefix\>.junit.full.path.to.test*. Tags: *job name, build number, test status.* List:
-	    * *wavefront.jenkins.plugin.job.junit.com.vmware.plugins.testclass.testingmethod*
 
-	    * Following metrics are also available at the Job level. List:
-            * *wavefront.jenkins.plugin.job.junit.jobName*
-            * *wavefront.jenkins.plugin.job.junit.jobName.passcount*
-            * *wavefront.jenkins.plugin.job.junit.jobName.failcount*
-            * *wavefront.jenkins.plugin.job.junit.jobName.skipcount*
-            * *wavefront.jenkins.plugin.job.junit.jobName.totalcount*
+	   * *wavefront.jenkins.plugin.job.junit.com.vmware.plugins.testclass.testingmethod*
+
+       * Following metrics are also available at the Job level.
+           * *wavefront.jenkins.plugin.job.junit.jobName*
+           * *wavefront.jenkins.plugin.job.junit.jobName.passcount*
+           * *wavefront.jenkins.plugin.job.junit.jobName.failcount*
+           * *wavefront.jenkins.plugin.job.junit.jobName.skipcount*
+           * *wavefront.jenkins.plugin.job.junit.jobName.totalcount*
 	
 6.	**Jacoco report** – If it's enabled, sends minimum, maximum, covered and total number of instructions-coverage, branch-coverage, complexity-coverage, line-coverage, method-coverage and class-coverage per job (not sent by default, needs Jenkins Jacoco plugin). Metric name: *\<job-metric-prefix\>.jobname.jacoco.line-coverage.minimum*. Tags: *job status, build number.* List:
 	* *wavefront.jenkins.plugin.job.jobname.jacoco.instructions-coverage.{minimum, maximum, covered, total}*
