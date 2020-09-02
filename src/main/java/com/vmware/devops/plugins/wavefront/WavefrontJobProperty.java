@@ -41,6 +41,7 @@ import net.sf.json.JSONObject;
 public class WavefrontJobProperty<T extends Job<?, ?>> extends JobProperty<T> {
     private boolean enableSendingJunitReportData = false;
     private boolean enableSendingJacocoReportData = false;
+    private String jobParameters = "";
 
     @DataBoundConstructor
     public WavefrontJobProperty() {
@@ -71,6 +72,15 @@ public class WavefrontJobProperty<T extends Job<?, ?>> extends JobProperty<T> {
         this.enableSendingJacocoReportData = enableSendingJacocoReportData;
     }
 
+    public String getJobParameters() {
+        return jobParameters;
+    }
+
+    @DataBoundSetter
+    public void setJobParameters(String jobParameters) {
+        this.jobParameters = jobParameters;
+    }
+
     /**
      * This method is called whenever the Job form is saved. We use the 'on' property
      * to determine if the controls are selected.
@@ -93,6 +103,7 @@ public class WavefrontJobProperty<T extends Job<?, ?>> extends JobProperty<T> {
         if (!isEnableToSendJacocoReportData) {
             enableSendingJacocoReportData = false;
         }
+        jobParameters = form.getString("jobParameters");
         return prop;
     }
 

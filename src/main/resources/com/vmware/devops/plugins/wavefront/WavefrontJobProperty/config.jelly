@@ -1,6 +1,6 @@
 <?jelly escape-by-default='true'?>
-<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout"
-         xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+<j:jelly xmlns:j="jelly:core"
+         xmlns:f="/lib/form">
 
     <f:section title="Wavefront Settings">
         <f:entry title="Enable sending JUnit reports for this job" field="enableSendingJunitReportData">
@@ -9,6 +9,11 @@
         <f:entry title="Enable sending Jacoco code coverage reports for this job" field="enableSendingJacocoReportData">
             <f:checkbox/>
         </f:entry>
+        <f:entry title="Choose which job parameters to send to wavefront" field="jobParameters"
+                 help="/plugin/wavefront/help-jobParametersProperty.html">
+            <f:textarea/>
+        </f:entry>
+
     </f:section>
 
     <tr>

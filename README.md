@@ -34,8 +34,8 @@ There are 2 kinds of metric data that the plugin process:
 * Job and pipeline metrics - these are sent on job run completion.
 
 #### Metrics types prefixes
-Jenkins system and node label metrics are prefixed and sent to Wavefront with ***wavefront.jenkins.plugin*** and
-job metrics are prefixed with ***wavefront.jenkins.plugin.job*** prefix by default. These prefixes can be customized from the *Wavefront plugin configuration* page.
+Jenkins system and node label metrics are prefixed and sent to Wavefront with ***wjp*** and
+job metrics are prefixed with ***wjp.job*** prefix by default. These prefixes can be customized from the *Wavefront plugin configuration* page.
 
 #### Optional metrics
 You can set whether to send JUnit and Jacoco reports from the respective job properties.
@@ -44,49 +44,49 @@ You can set whether to send JUnit and Jacoco reports from the respective job pro
 
 #### Available metrics:
 1.	**Jenkins system** – System CPU (This value is a double in the [0.0, 1.0] interval), Total physical memory (in bytes), Free physical memory (in bytes), Max heap memory (in bytes), Used heap memory (in bytes). Metric name: *\<metric-prefix\>.system-cpu*. List:
-	* *wavefront.jenkins.plugin.system-cpu*
-	* *wavefront.jenkins.plugin.total-physical-memory*
-	* *wavefront.jenkins.plugin.free-physical-memory*
-	* *wavefront.jenkins.plugin.max-heap-memory*
-	* *wavefront.jenkins.used-heap-memory*
+	* *wjp.system-cpu*
+	* *wjp.total-physical-memory*
+	* *wjp.free-physical-memory*
+	* *wjp.max-heap-memory*
+	* *wjp.used-heap-memory*
  
 2.	**Label nodes** – For each node label the plugin sends number of available executors, busy executors, connecting executors, defined executors, idle executors, online executors and queue length. Metric name: *\<metric-prefix\>.label.available-executors*. List:
-	* *wavefront.jenkins.plugin.label.available-executors*
-	* *wavefront.jenkins.plugin.label.busy-executors*
-	* *wavefront.jenkins.plugin.label.connecting-executors*
-	* *wavefront.jenkins.plugin.label.defined-executors*
-	* *wavefront.jenkins.plugin.label.idle-executors*
-	* *wavefront.jenkins.plugin.label.online-executors*
-	* *wavefront.jenkins.plugin.label.queue-length*
+	* *wjp.label.available-executors*
+	* *wjp.label.busy-executors*
+	* *wjp.label.connecting-executors*
+	* *wjp.label.defined-executors*
+	* *wjp.label.idle-executors*
+	* *wjp.label.online-executors*
+	* *wjp.label.queue-length*
 
 3.	**Job metrics** – Total duration (in milliseconds) of the job, status and build number. Metric name: *\<job-metric-prefix\>.jobname*. Tags: *job status, build number.* List:
-	* *wavefront.jenkins.plugin.job.jobname*
+	* *wjp.job.jobname*
 
 4.	**Pipeline metrics (stages and parallel branches)** – In addition to the job metrics, duration (in milliseconds) for each stage and branch in parallel step. Metric name: *\<job-metric-prefix\>.jobname.{stage, parralel}.stagename*. Tags: *job status, build number.* List:
-	* *wavefront.jenkins.plugin.job.jobname.stage.stagename*
-    * *wavefront.jenkins.plugin.job.jobname.parallel.branchname*
+	* *wjp.job.jobname.stage.stagename*
+    * *wjp.job.jobname.parallel.branchname*
     
 5.	**JUnit report** – If it's enabled, duration (in milliseconds) for each JUnit test per job (not send by default, needs Jenkins JUnit plugin). Metric name: *\<job-metric-prefix\>.junit.full.path.to.test*. Tags: *job name, build number, test status.* List:
 
-	   * *wavefront.jenkins.plugin.job.junit.com.vmware.plugins.testclass.testingmethod*
+	   * *wjp.job.junit.com.vmware.plugins.testclass.testingmethod*
 
        * Following metrics are also available at the Job level.
-           * *wavefront.jenkins.plugin.job.junit.jobName*
-           * *wavefront.jenkins.plugin.job.junit.jobName.passcount*
-           * *wavefront.jenkins.plugin.job.junit.jobName.failcount*
-           * *wavefront.jenkins.plugin.job.junit.jobName.skipcount*
-           * *wavefront.jenkins.plugin.job.junit.jobName.totalcount*
+           * *wjp.job.junit.jobName*
+           * *wjp.job.junit.jobName.passcount*
+           * *wjp.job.junit.jobName.failcount*
+           * *wjp.job.junit.jobName.skipcount*
+           * *wjp.job.junit.jobName.totalcount*
 	
 6.	**Jacoco report** – If it's enabled, sends minimum, maximum, covered and total number of instructions-coverage, branch-coverage, complexity-coverage, line-coverage, method-coverage and class-coverage per job (not sent by default, needs Jenkins Jacoco plugin). Metric name: *\<job-metric-prefix\>.jobname.jacoco.line-coverage.minimum*. Tags: *job status, build number.* List:
-	* *wavefront.jenkins.plugin.job.jobname.jacoco.instructions-coverage.{minimum, maximum, covered, total}*
-	* *wavefront.jenkins.plugin.job.jobname.jacoco.branch-coverage.{minimum, maximum, covered, total}*
-	* *wavefront.jenkins.plugin.job.jobname.jacoco.complexity-coverage.{minimum, maximum, covered, total}*
-	* *wavefront.jenkins.plugin.job.jobname.jacoco.line-coverage.{minimum, maximum, covered, total}*
-	* *wavefront.jenkins.plugin.job.jobname.jacoco.method-coverage.{minimum, maximum, covered, total}*
-	* *wavefront.jenkins.plugin.job.jobname.jacoco.class-coverage.{minimum, maximum, covered, total}*
+	* *wjp.job.jobname.jacoco.instructions-coverage.{minimum, maximum, covered, total}*
+	* *wjp.job.jobname.jacoco.branch-coverage.{minimum, maximum, covered, total}*
+	* *wjp.job.jobname.jacoco.complexity-coverage.{minimum, maximum, covered, total}*
+	* *wjp.job.jobname.jacoco.line-coverage.{minimum, maximum, covered, total}*
+	* *wjp.job.jobname.jacoco.method-coverage.{minimum, maximum, covered, total}*
+	* *wjp.job.jobname.jacoco.class-coverage.{minimum, maximum, covered, total}*
 
 7.  **Custom step (wavefrontTimedCall)** – The wavefrontTimedCall step measure duration (in milliseconds) in given block. Syntax: *wavefrontTimedCall(“metricName”) {…}.* Metric name: *\<job-metric-prefix\>.step.metricname*. Tags: *job name, build number.* List:
-    * *wavefront.jenkins.plugin.job.step.metricname*
+    * *wjp.job.step.metricname*
 
 ## Configuration
 

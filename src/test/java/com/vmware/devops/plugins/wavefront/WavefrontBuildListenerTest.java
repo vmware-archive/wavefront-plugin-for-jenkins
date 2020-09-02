@@ -47,9 +47,13 @@ import org.jvnet.hudson.test.JenkinsRule;
 
 import com.gargoylesoftware.htmlunit.html.HtmlForm;
 
+import hudson.model.BooleanParameterDefinition;
 import hudson.model.Job;
+import hudson.model.ParameterDefinition;
+import hudson.model.ParametersDefinitionProperty;
 import hudson.model.Result;
 import hudson.model.Run;
+import hudson.model.StringParameterDefinition;
 import hudson.model.TaskListener;
 import hudson.plugins.jacoco.JacocoBuildAction;
 import hudson.plugins.jacoco.JacocoHealthReportThresholds;
@@ -154,6 +158,43 @@ public class WavefrontBuildListenerTest {
                 message += "\n" + metricName;
             }
             Assert.fail(message);
+        }
+    }
+
+
+    @Test
+    public void testSendingJobParametersToWavefront() throws Exception {
+        List<String> expected = new ArrayList<>(Arrays.asList(
+                "p_branch=master",
+                "p_isDevMode=true"
+        ));
+
+        WorkflowJob job = jenkinsRule.createProject(WorkflowJob.class, "Test Job");
+
+        ParameterDefinition paramDef0 = new StringParameterDefinition("dummyParam", "dummyValue", "");
+        ParameterDefinition paramDef1 = new StringParameterDefinition("branch", "master", "");
+        ParameterDefinition paramDef2 = new BooleanParameterDefinition("isDevMode", true, "");
+        ParametersDefinitionProperty prop = new ParametersDefinitionProperty(paramDef0, paramDef1, paramDef2);
+        job.addProperty(prop);
+
+        WavefrontJobProperty junitReportProperty = mock(WavefrontJobProperty.class);
+        String jobParametersToSend = "branch\nisDevMode";
+        when(junitReportProperty.getJobParameters()).thenReturn(jobParametersToSend);
+        job.addProperty(junitReportProperty);
+
+        job.setDefinition(new CpsFlowDefinition("node {\n" +
+                "}", true));
+
+        jenkinsRule.buildAndAssertSuccess(job);
+
+        List<String> messages = proxy.terminate();
+        String actual = messages.get(0).replaceAll("[\"]", "");
+
+        String message = "The expected point tags are not present";
+        for (String e : expected) {
+            if (!actual.contains(e)) {
+                Assert.fail(message);
+            }
         }
     }
 

@@ -52,6 +52,8 @@ import com.vmware.devops.plugins.wavefront.util.Sanitizer;
 
 import hudson.Extension;
 import hudson.model.Action;
+import hudson.model.ParameterValue;
+import hudson.model.ParametersAction;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.model.listeners.RunListener;
@@ -69,6 +71,7 @@ public class WavefrontBuildListener extends RunListener<Run> {
     private static final String PASSED = "Passed";
     private static final String FAILED = "Failed";
     private static final String SKIPPED = "Skipped";
+    private static final String PARAMETER_FIELD_PREFIX = "p_";
     private WavefrontManagement wfManagement;
 
     public WavefrontBuildListener() {
@@ -90,11 +93,11 @@ public class WavefrontBuildListener extends RunListener<Run> {
                 if (run instanceof WorkflowRun) {
                     sendPipelineMetricsToWavefront((WorkflowRun) run);
                 }
-                WavefrontJobProperty junitReportProperty = (WavefrontJobProperty) run.getParent().getProperty(WavefrontJobProperty.class);
-                if (wfManagement.isEnableSendingJunitReportDataForAllJobs() || (junitReportProperty != null && junitReportProperty.isEnableSendingJunitReportData())) {
+                WavefrontJobProperty jobProperty = (WavefrontJobProperty) run.getParent().getProperty(WavefrontJobProperty.class);
+                if (wfManagement.isEnableSendingJunitReportDataForAllJobs() || (jobProperty != null && jobProperty.isEnableSendingJunitReportData())) {
                     sendJunitReportMetricsToWavefront(run);
                 }
-                if (wfManagement.isEnableSendingJacocoReportDataForAllJobs() || (junitReportProperty != null && junitReportProperty.isEnableSendingJacocoReportData())) {
+                if (wfManagement.isEnableSendingJacocoReportDataForAllJobs() || (jobProperty != null && jobProperty.isEnableSendingJacocoReportData())) {
                     sendJacocoReportMetricsToWavefront(run);
                 }
 
@@ -109,6 +112,19 @@ public class WavefrontBuildListener extends RunListener<Run> {
         Map<String, String> tags = new HashMap<>();
         tags.put(STATUS, run.getResult().toString());
         tags.put(BUILD_NUMBER, run.getId());
+
+        WavefrontJobProperty jobProperty = (WavefrontJobProperty) run.getParent().getProperty(WavefrontJobProperty.class);
+        ParametersAction action = run.getAction(ParametersAction.class);
+        if (action != null && jobProperty != null) {
+            String[] jobParameters = jobProperty.getJobParameters().split("\\R+");
+            for (int i = 0; i < jobParameters.length; i++) {
+                ParameterValue parameter = action.getParameter(jobParameters[i]);
+                if (parameter != null && !parameter.getValue().toString().isEmpty()) {
+                    tags.put(PARAMETER_FIELD_PREFIX + parameter.getName(), parameter.getValue().toString());
+                }
+            }
+        }
+
         long duration = run.getDuration();
         String jobName = Sanitizer.sanitizeMetricCategory(Sanitizer.getDecodeJobName(run.getParent().getFullName()));
         sendMetricsToWavefront(jobName, duration, tags);
