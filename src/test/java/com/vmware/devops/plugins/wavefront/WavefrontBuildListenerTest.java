@@ -163,7 +163,7 @@ public class WavefrontBuildListenerTest {
 
 
     @Test
-    public void testSendingJobParametersToWavefront() throws Exception {
+    public void testSendingSpecificJobParametersToWavefront() throws Exception {
         List<String> expected = new ArrayList<>(Arrays.asList(
                 "p_branch=master",
                 "p_isDevMode=true"
@@ -177,10 +177,11 @@ public class WavefrontBuildListenerTest {
         ParametersDefinitionProperty prop = new ParametersDefinitionProperty(paramDef0, paramDef1, paramDef2);
         job.addProperty(prop);
 
-        WavefrontJobProperty junitReportProperty = mock(WavefrontJobProperty.class);
+        WavefrontJobProperty wavefrontJobProperty = mock(WavefrontJobProperty.class);
         String jobParametersToSend = "branch\nisDevMode";
-        when(junitReportProperty.getJobParameters()).thenReturn(jobParametersToSend);
-        job.addProperty(junitReportProperty);
+        when(wavefrontJobProperty.isEnableSendingJobParameters()).thenReturn(true);
+        when(wavefrontJobProperty.getJobParameters()).thenReturn(jobParametersToSend);
+        job.addProperty(wavefrontJobProperty);
 
         job.setDefinition(new CpsFlowDefinition("node {\n" +
                 "}", true));
@@ -193,6 +194,72 @@ public class WavefrontBuildListenerTest {
         String message = "The expected point tags are not present";
         for (String e : expected) {
             if (!actual.contains(e)) {
+                Assert.fail(message);
+            }
+        }
+    }
+
+    @Test
+    public void testSendingAllJobParametersToWavefront() throws Exception {
+        List<String> expected = new ArrayList<>(Arrays.asList(
+                "p_branch=master",
+                "p_isDevMode=true",
+                "p_dummyParam=dummyValue"
+        ));
+
+        WorkflowJob job = jenkinsRule.createProject(WorkflowJob.class, "Test Job");
+
+        ParameterDefinition paramDef0 = new StringParameterDefinition("dummyParam", "dummyValue", "");
+        ParameterDefinition paramDef1 = new StringParameterDefinition("branch", "master", "");
+        ParameterDefinition paramDef2 = new BooleanParameterDefinition("isDevMode", true, "");
+        ParametersDefinitionProperty prop = new ParametersDefinitionProperty(paramDef0, paramDef1, paramDef2);
+        job.addProperty(prop);
+
+        WavefrontJobProperty wavefrontJobProperty = mock(WavefrontJobProperty.class);
+        when(wavefrontJobProperty.isEnableSendingJobParameters()).thenReturn(true);
+        job.addProperty(wavefrontJobProperty);
+
+        job.setDefinition(new CpsFlowDefinition("node {\n" +
+                "}", true));
+
+        jenkinsRule.buildAndAssertSuccess(job);
+
+        List<String> messages = proxy.terminate();
+        String actual = messages.get(0).replaceAll("[\"]", "");
+        String message = "The expected point tags are not present";
+        for (String e : expected) {
+            if (!actual.contains(e)) {
+                Assert.fail(message);
+            }
+        }
+    }
+
+    @Test
+    public void testWhenWavefrontJobPropertyIsNull() throws Exception {
+        List<String> expected = new ArrayList<>(Arrays.asList(
+                "p_branch=master",
+                "p_isDevMode=true",
+                "p_dummyParam=dummyValue"
+        ));
+
+        WorkflowJob job = jenkinsRule.createProject(WorkflowJob.class, "Test Job");
+
+        ParameterDefinition paramDef0 = new StringParameterDefinition("dummyParam", "dummyValue", "");
+        ParameterDefinition paramDef1 = new StringParameterDefinition("branch", "master", "");
+        ParameterDefinition paramDef2 = new BooleanParameterDefinition("isDevMode", true, "");
+        ParametersDefinitionProperty prop = new ParametersDefinitionProperty(paramDef0, paramDef1, paramDef2);
+        job.addProperty(prop);
+
+        job.setDefinition(new CpsFlowDefinition("node {\n" +
+                "}", true));
+
+        jenkinsRule.buildAndAssertSuccess(job);
+
+        List<String> messages = proxy.terminate();
+        String actual = messages.get(0).replaceAll("[\"]", "");
+        String message = "The expected point tags are not present";
+        for (String e : expected) {
+            if (actual.contains(e)) {
                 Assert.fail(message);
             }
         }

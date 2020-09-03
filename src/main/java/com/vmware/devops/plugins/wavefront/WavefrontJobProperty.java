@@ -41,12 +41,12 @@ import net.sf.json.JSONObject;
 public class WavefrontJobProperty<T extends Job<?, ?>> extends JobProperty<T> {
     private boolean enableSendingJunitReportData = false;
     private boolean enableSendingJacocoReportData = false;
+    private boolean enableSendingJobParameters = false;
     private String jobParameters = "";
 
     @DataBoundConstructor
     public WavefrontJobProperty() {
     }
-
 
     public boolean isEnableSendingJunitReportData() {
         return enableSendingJunitReportData;
@@ -72,10 +72,25 @@ public class WavefrontJobProperty<T extends Job<?, ?>> extends JobProperty<T> {
         this.enableSendingJacocoReportData = enableSendingJacocoReportData;
     }
 
+    public boolean isEnableSendingJobParameters() {
+        return enableSendingJobParameters;
+    }
+
+    /**
+     * @param enableSendingJobParameters - The configured checkbox in the job configuration
+     */
+    @DataBoundSetter
+    public void setEnableSendingJobParameters(boolean enableSendingJobParameters) {
+        this.enableSendingJobParameters = enableSendingJobParameters;
+    }
+
     public String getJobParameters() {
         return jobParameters;
     }
 
+    /**
+     * @param jobParameters - The configured textarea in the job configuration
+     */
     @DataBoundSetter
     public void setJobParameters(String jobParameters) {
         this.jobParameters = jobParameters;
@@ -93,7 +108,6 @@ public class WavefrontJobProperty<T extends Job<?, ?>> extends JobProperty<T> {
     @Override
     public JobProperty<?> reconfigure(StaplerRequest req, @Nonnull JSONObject form)
             throws Descriptor.FormException {
-
         WavefrontJobProperty prop = (WavefrontJobProperty) super.reconfigure(req, form);
         boolean isEnableToSendJunitReportData = form.getBoolean("enableSendingJunitReportData");
         if (!isEnableToSendJunitReportData) {
@@ -104,9 +118,9 @@ public class WavefrontJobProperty<T extends Job<?, ?>> extends JobProperty<T> {
             enableSendingJacocoReportData = false;
         }
         jobParameters = form.getString("jobParameters");
+
         return prop;
     }
-
 
     @Extension
     public static final class WavefrontJobPropertyDescriptorImpl

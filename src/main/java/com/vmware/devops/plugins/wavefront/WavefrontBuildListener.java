@@ -113,21 +113,43 @@ public class WavefrontBuildListener extends RunListener<Run> {
         tags.put(STATUS, run.getResult().toString());
         tags.put(BUILD_NUMBER, run.getId());
 
-        WavefrontJobProperty jobProperty = (WavefrontJobProperty) run.getParent().getProperty(WavefrontJobProperty.class);
-        ParametersAction action = run.getAction(ParametersAction.class);
-        if (action != null && jobProperty != null) {
-            String[] jobParameters = jobProperty.getJobParameters().split("\\R+");
-            for (int i = 0; i < jobParameters.length; i++) {
-                ParameterValue parameter = action.getParameter(jobParameters[i]);
-                if (parameter != null && !parameter.getValue().toString().isEmpty()) {
-                    tags.put(PARAMETER_FIELD_PREFIX + parameter.getName(), parameter.getValue().toString());
-                }
-            }
-        }
+        extractParameterNamesAsTags(run, tags);
 
         long duration = run.getDuration();
         String jobName = Sanitizer.sanitizeMetricCategory(Sanitizer.getDecodeJobName(run.getParent().getFullName()));
         sendMetricsToWavefront(jobName, duration, tags);
+    }
+
+    private void extractParameterNamesAsTags(Run run, Map<String, String> tags) {
+        WavefrontJobProperty jobProperty = (WavefrontJobProperty) run.getParent().getProperty(WavefrontJobProperty.class);
+        ParametersAction action = run.getAction(ParametersAction.class);
+
+        if (jobProperty != null && action != null && jobProperty.isEnableSendingJobParameters()) {
+            if (jobProperty.getJobParameters() == null || jobProperty.getJobParameters().isEmpty()) {
+                addAllJobParametersAsTags(tags, action);
+            } else {
+                addSpecificJobParametersAsTags(tags, action, jobProperty);
+            }
+        }
+    }
+
+    private void addAllJobParametersAsTags(Map<String, String> tags, ParametersAction parametersAction) {
+        for (ParameterValue p : parametersAction.getParameters()) {
+            Object value = p.getValue();
+            if (value != null && !value.toString().isEmpty()) {
+                tags.put(PARAMETER_FIELD_PREFIX + p.getName(), value.toString());
+            }
+        }
+    }
+
+    private void addSpecificJobParametersAsTags(Map<String, String> tags, ParametersAction parametersAction, WavefrontJobProperty jobProperty) {
+        String[] jobParameters = jobProperty.getJobParameters().split("\\R+");
+        for (int i = 0; i < jobParameters.length; i++) {
+            ParameterValue p = parametersAction.getParameter(jobParameters[i]);
+            if (p != null && p.getValue() != null && !p.getValue().toString().isEmpty()) {
+                tags.put(PARAMETER_FIELD_PREFIX + p.getName(), p.getValue().toString());
+            }
+        }
     }
 
     private void sendPipelineMetricsToWavefront(WorkflowRun run) throws IOException {
