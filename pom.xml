@@ -11,7 +11,7 @@
 
     <groupId>com.vmware.devops</groupId>
     <artifactId>wavefront</artifactId>
-    <version>1.1.0-SNAPSHOT</version>
+    <version>1.1.0</version>
     <packaging>hpi</packaging>
 
     <name>Wavefront Plugin</name>
@@ -269,6 +269,6 @@
         <connection>scm:git:git://github.com/jenkinsci/wavefront-plugin.git</connection>
         <developerConnection>scm:git:git@github.com:jenkinsci/wavefront-plugin.git</developerConnection>
         <url>https://github.com/jenkinsci/wavefront-plugin.git</url>
-        <tag>${scmTag}</tag>
+        <tag>wavefront-1.1.0</tag>
     </scm>
 </project>
