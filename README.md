@@ -1,4 +1,4 @@
-![wavefront-logo](https://user-images.githubusercontent.com/56251894/67003694-32172500-f0e7-11e9-92b2-7952d76f84d9.png)
+![wavefront-logo](src/main/webapp/images/wavefront-plugin-logo.png)
 # Wavefront Plugin for Jenkins
 
 ### Content
@@ -102,7 +102,7 @@ From *Wavefront proxy configuration section* we need to set up:
 
 If proxy hostname is not specified (left empty) then no metrics will be sent to Wavefront.
 
-![plugin-configuration](https://user-images.githubusercontent.com/56251894/67005306-fd0cd180-f0ea-11e9-8985-e53a3984f83d.png)
+![plugin-configuration](src/main/webapp/images/wavefront-plugin-configuration.png)
 
 ## Contributing
 
