@@ -56,6 +56,9 @@
                     <f:entry title="Sending Jacoco reports for all jobs" field="enableSendingJacocoReportDataForAllJobs">
                         <f:checkbox checked="${it.enableSendingJacocoReportDataForAllJobs}"/>
                     </f:entry>
+                    <f:entry title="Sending Job parameters as tags for all jobs" field="enableSendingParametersAsTagsForAllJobs">
+                        <f:checkbox checked="${it.enableSendingParametersAsTagsForAllJobs}"/>
+                    </f:entry>
                 </f:section>
 
                 <f:block>

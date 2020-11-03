@@ -116,7 +116,7 @@ public class WavefrontBuildListener extends RunListener<Run> {
         extractParameterNamesAsTags(run, tags);
 
         long duration = run.getDuration();
-        String jobName = Sanitizer.sanitizeMetricCategory(Sanitizer.getDecodeJobName(run.getParent().getFullName()));
+        String jobName = getJobNameFromRun(run);
         sendMetricsToWavefront(jobName, duration, tags);
     }
 
@@ -124,13 +124,28 @@ public class WavefrontBuildListener extends RunListener<Run> {
         WavefrontJobProperty jobProperty = (WavefrontJobProperty) run.getParent().getProperty(WavefrontJobProperty.class);
         ParametersAction action = run.getAction(ParametersAction.class);
 
-        if (jobProperty != null && action != null && jobProperty.isEnableSendingJobParameters()) {
+        if (action == null) {
+            String jobName = getJobNameFromRun(run);
+            LOGGER.log(Level.FINE, "ParametersAction is null, there is NOT defined parameters for job: " + jobName);
+            return;
+        }
+
+        if (jobProperty != null && jobProperty.isEnableSendingJobParameters()) {
             if (jobProperty.getJobParameters() == null || jobProperty.getJobParameters().isEmpty()) {
                 addAllJobParametersAsTags(tags, action);
             } else {
                 addSpecificJobParametersAsTags(tags, action, jobProperty);
             }
+            return;
         }
+
+        if (wfManagement.isEnableSendingParametersAsTagsForAllJobs()) {
+            addAllJobParametersAsTags(tags, action);
+        }
+    }
+
+    private String getJobNameFromRun(Run run) {
+        return Sanitizer.sanitizeMetricCategory(Sanitizer.getDecodeJobName(run.getParent().getFullName()));
     }
 
     private void addAllJobParametersAsTags(Map<String, String> tags, ParametersAction parametersAction) {
@@ -144,8 +159,8 @@ public class WavefrontBuildListener extends RunListener<Run> {
 
     private void addSpecificJobParametersAsTags(Map<String, String> tags, ParametersAction parametersAction, WavefrontJobProperty jobProperty) {
         String[] jobParameters = jobProperty.getJobParameters().split("\\R+");
-        for (int i = 0; i < jobParameters.length; i++) {
-            ParameterValue p = parametersAction.getParameter(jobParameters[i]);
+        for (String param : jobParameters) {
+            ParameterValue p = parametersAction.getParameter(param);
             if (p != null && p.getValue() != null && !p.getValue().toString().isEmpty()) {
                 tags.put(PARAMETER_FIELD_PREFIX + p.getName(), p.getValue().toString());
             }
@@ -153,7 +168,7 @@ public class WavefrontBuildListener extends RunListener<Run> {
     }
 
     private void sendPipelineMetricsToWavefront(WorkflowRun run) throws IOException {
-        String pipelineName = Sanitizer.sanitizeMetricCategory(Sanitizer.getDecodeJobName(run.getParent().getFullName()));
+        String pipelineName = getJobNameFromRun(run);
         String buildNumber = run.getId();
 
         if (run.getExecution() != null) {
@@ -264,7 +279,7 @@ public class WavefrontBuildListener extends RunListener<Run> {
     }
 
     private void sendJunitReportMetricsToWavefront(Run run) throws IOException {
-        String jobName = Sanitizer.sanitizeMetricCategory(Sanitizer.getDecodeJobName(run.getParent().getFullName()));
+        String jobName = getJobNameFromRun(run);
         String buildNumber = run.getId();
 
         TestResultAction action = run.getAction(TestResultAction.class);
@@ -316,7 +331,7 @@ public class WavefrontBuildListener extends RunListener<Run> {
     }
 
     private void sendJacocoReportMetricsToWavefront(Run run) throws IOException {
-        String jobName = Sanitizer.sanitizeMetricCategory(Sanitizer.getDecodeJobName(run.getParent().getFullName()));
+        String jobName = getJobNameFromRun(run);
         String buildNumber = run.getId();
 
         JacocoBuildAction action = run.getAction(JacocoBuildAction.class);
