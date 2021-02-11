@@ -35,6 +35,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
@@ -195,6 +196,47 @@ public class WavefrontBuildListenerTest {
         for (String e : expected) {
             if (!actual.contains(e)) {
                 Assert.fail(message);
+            }
+        }
+    }
+
+    @Test
+    public void testSendingMoreThanMaxJobParametersToWavefront() throws Exception {
+        int maxAllowedJobParamTags = WavefrontBuildListener.MAX_ALLOWED_JOB_PARAMETER_POINT_TAGS;
+        List<ParameterDefinition> paramDefinitions = getJobParameters(maxAllowedJobParamTags + 2);
+        List<ParameterDefinition> acceptedParams = paramDefinitions.subList(0, maxAllowedJobParamTags);
+        List<ParameterDefinition> droppedParams = paramDefinitions.subList(maxAllowedJobParamTags, paramDefinitions.size() - 1);
+
+        List<String> expectedTags = acceptedParams.stream().map(p -> "p_" + p.getDefaultParameterValue().getName() + "=" + p.getDefaultParameterValue().getValue()).collect(Collectors.toList());
+        List<String> droppedTags = droppedParams.stream().map(p -> "p_" + p.getDefaultParameterValue().getName() + "=" + p.getDefaultParameterValue().getValue()).collect(Collectors.toList());
+
+        WorkflowJob job = jenkinsRule.createProject(WorkflowJob.class, "Test Job");
+
+        ParametersDefinitionProperty prop = new ParametersDefinitionProperty(paramDefinitions);
+        job.addProperty(prop);
+
+        WavefrontJobProperty wavefrontJobProperty = mock(WavefrontJobProperty.class);
+        when(wavefrontJobProperty.isEnableSendingJobParameters()).thenReturn(true);
+        job.addProperty(wavefrontJobProperty);
+
+        job.setDefinition(new CpsFlowDefinition("node {\n" +
+                "}", true));
+
+        jenkinsRule.buildAndAssertSuccess(job);
+
+        List<String> messages = proxy.terminate();
+        String actual = messages.get(0).replaceAll("[\"]", "");
+        String message = "Missing Job parameter point tag ";
+        for (String e : expectedTags) {
+            if (!actual.contains(e)) {
+                Assert.fail(message + e);
+            }
+        }
+
+        message = "More than maximum Job parameter point tags are present ";
+        for (String e : droppedTags) {
+            if (actual.contains(e)) {
+                Assert.fail(message + e);
             }
         }
     }
@@ -468,5 +510,16 @@ public class WavefrontBuildListenerTest {
             result.add(message);
         }
         return result;
+    }
+
+    private List<ParameterDefinition> getJobParameters(int number) {
+        List<ParameterDefinition> params = new ArrayList<>();
+        int count = 0;
+        while (count <= number) {
+            StringParameterDefinition p = new StringParameterDefinition(String.valueOf(count + 1), "value_" + String.valueOf(count + 1), "");
+            params.add(p);
+            count++;
+        }
+        return params;
     }
 }

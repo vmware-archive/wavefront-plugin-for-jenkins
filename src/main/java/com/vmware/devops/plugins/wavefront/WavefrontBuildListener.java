@@ -72,6 +72,8 @@ public class WavefrontBuildListener extends RunListener<Run> {
     private static final String FAILED = "Failed";
     private static final String SKIPPED = "Skipped";
     private static final String PARAMETER_FIELD_PREFIX = "p_";
+    public static final Integer MAX_ALLOWED_JOB_PARAMETER_POINT_TAGS = 10;
+    public static final Integer MAX_ALLOWED_POINT_TAGS = 20;
     private WavefrontManagement wfManagement;
 
     public WavefrontBuildListener() {
@@ -101,9 +103,9 @@ public class WavefrontBuildListener extends RunListener<Run> {
                     sendJacocoReportMetricsToWavefront(run);
                 }
 
-                LOGGER.log(Level.FINE, "Job metrics successfully sent");
+                LOGGER.log(Level.FINE, "Job metrics successfully sent for " + run.getFullDisplayName());
             } catch (IOException e) {
-                LOGGER.log(Level.WARNING, "Failed to send job metrics to Wavefront", e);
+                LOGGER.log(Level.WARNING, "Failed to send job metrics to Wavefront for " + run.getFullDisplayName(), e);
             }
         }
     }
@@ -130,17 +132,18 @@ public class WavefrontBuildListener extends RunListener<Run> {
             return;
         }
 
+        int tagSizeCutOff = Math.min(tags.size() + MAX_ALLOWED_JOB_PARAMETER_POINT_TAGS, MAX_ALLOWED_POINT_TAGS);
         if (jobProperty != null && jobProperty.isEnableSendingJobParameters()) {
             if (jobProperty.getJobParameters() == null || jobProperty.getJobParameters().isEmpty()) {
-                addAllJobParametersAsTags(tags, action);
+                addAllJobParametersAsTags(tags, action, tagSizeCutOff);
             } else {
-                addSpecificJobParametersAsTags(tags, action, jobProperty);
+                addSpecificJobParametersAsTags(tags, action, jobProperty, tagSizeCutOff);
             }
             return;
         }
 
         if (wfManagement.isEnableSendingParametersAsTagsForAllJobs()) {
-            addAllJobParametersAsTags(tags, action);
+            addAllJobParametersAsTags(tags, action, tagSizeCutOff);
         }
     }
 
@@ -148,20 +151,20 @@ public class WavefrontBuildListener extends RunListener<Run> {
         return Sanitizer.sanitizeMetricCategory(Sanitizer.getDecodeJobName(run.getParent().getFullName()));
     }
 
-    private void addAllJobParametersAsTags(Map<String, String> tags, ParametersAction parametersAction) {
+    private void addAllJobParametersAsTags(Map<String, String> tags, ParametersAction parametersAction, int maxTagLimit) {
         for (ParameterValue p : parametersAction.getParameters()) {
             Object value = p.getValue();
-            if (value != null && !value.toString().isEmpty()) {
+            if (value != null && !value.toString().isEmpty() && tags.size() < maxTagLimit) {
                 tags.put(PARAMETER_FIELD_PREFIX + p.getName(), value.toString());
             }
         }
     }
 
-    private void addSpecificJobParametersAsTags(Map<String, String> tags, ParametersAction parametersAction, WavefrontJobProperty jobProperty) {
+    private void addSpecificJobParametersAsTags(Map<String, String> tags, ParametersAction parametersAction, WavefrontJobProperty jobProperty, int maxTagLimit) {
         String[] jobParameters = jobProperty.getJobParameters().split("\\R+");
         for (String param : jobParameters) {
             ParameterValue p = parametersAction.getParameter(param);
-            if (p != null && p.getValue() != null && !p.getValue().toString().isEmpty()) {
+            if (p != null && p.getValue() != null && !p.getValue().toString().isEmpty() && tags.size() < maxTagLimit) {
                 tags.put(PARAMETER_FIELD_PREFIX + p.getName(), p.getValue().toString());
             }
         }
