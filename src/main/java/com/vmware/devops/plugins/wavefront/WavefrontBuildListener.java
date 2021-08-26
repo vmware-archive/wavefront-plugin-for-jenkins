@@ -287,10 +287,11 @@ public class WavefrontBuildListener extends RunListener<Run> {
 
         TestResultAction action = run.getAction(TestResultAction.class);
         if (action != null) {
-
-            sendJobLevelJunitMetricsToWavefront(jobName, action);
-
             Map<String, String> tags = new HashMap<>();
+            extractParameterNamesAsTags(run, tags);
+
+            sendJobLevelJunitMetricsToWavefront(jobName, action, tags);
+
             tags.put(JOB_NAME, jobName);
             tags.put(BUILD_NUMBER, buildNumber);
 
@@ -303,7 +304,7 @@ public class WavefrontBuildListener extends RunListener<Run> {
         }
     }
 
-    private void sendJobLevelJunitMetricsToWavefront(String jobName, final TestResultAction action) throws IOException {
+    private void sendJobLevelJunitMetricsToWavefront(String jobName, final TestResultAction action, Map<String, String> tags) throws IOException {
         String jobMetricName = "junit." + jobName;
         String countMetricName = "%s.%scount";
         int skipped = action.getSkipCount();
@@ -313,13 +314,13 @@ public class WavefrontBuildListener extends RunListener<Run> {
 
         // Duration metric
         double fullDurationForTests = action.getResult().getDuration() * 1000;
-        sendMetricsToWavefront(jobMetricName, fullDurationForTests, null); // send whole time required for tests
+        sendMetricsToWavefront(jobMetricName, fullDurationForTests, tags); // send whole time required for tests
 
         // Junit Tests Count metric
-        sendMetricsToWavefront(String.format(countMetricName, jobMetricName, "skip"), skipped, null);
-        sendMetricsToWavefront(String.format(countMetricName, jobMetricName, "fail"), failed, null);
-        sendMetricsToWavefront(String.format(countMetricName, jobMetricName, "total"), total, null);
-        sendMetricsToWavefront(String.format(countMetricName, jobMetricName, "pass"), passed, null);
+        sendMetricsToWavefront(String.format(countMetricName, jobMetricName, "skip"), skipped, tags);
+        sendMetricsToWavefront(String.format(countMetricName, jobMetricName, "fail"), failed, tags);
+        sendMetricsToWavefront(String.format(countMetricName, jobMetricName, "total"), total, tags);
+        sendMetricsToWavefront(String.format(countMetricName, jobMetricName, "pass"), passed, tags);
 
     }
 

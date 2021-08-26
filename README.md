@@ -40,7 +40,12 @@ job metrics are prefixed with ***wjp.job*** prefix by default. These prefixes ca
 #### Optional metrics
 You can set whether to send JUnit and Jacoco reports from the respective job properties.
 
-![job-property](https://user-images.githubusercontent.com/56251894/67005222-d2bb1400-f0ea-11e9-813c-b8ada4b20a0f.png)
+![job-property](src/main/webapp/images/wavefront-plugin-job-configuration.png)
+Another option is to send job parameters as tags (parameterName=parameterValue) for the following metrics:
+* **Job metrics**
+* **Junit report**
+
+Job parameter tags are prefixed with `p_` and are limited to `10` per job execution.
 
 #### Available metrics:
 1.	**Jenkins system** – System CPU (This value is a double in the [0.0, 1.0] interval), Total physical memory (in bytes), Free physical memory (in bytes), Max heap memory (in bytes), Used heap memory (in bytes). Metric name: *\<metric-prefix\>.system-cpu*. List:
