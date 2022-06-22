@@ -48,12 +48,14 @@ import org.jenkinsci.plugins.workflow.graph.FlowGraphWalker;
 import org.jenkinsci.plugins.workflow.graph.FlowNode;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 
+import com.vmware.devops.plugins.wavefront.exceptions.NullPointerArgumentException;
 import com.vmware.devops.plugins.wavefront.util.Sanitizer;
 
 import hudson.Extension;
 import hudson.model.Action;
 import hudson.model.ParameterValue;
 import hudson.model.ParametersAction;
+import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.model.listeners.RunListener;
@@ -82,59 +84,79 @@ public class WavefrontBuildListener extends RunListener<Run> {
 
     /**
      * Called when a build is completed.
-     *
-     * @param run      - A Run object representing a particular execution of Job.
-     * @param listener - A TaskListener object which receives events that happen during some
-     *                 operation.
+     * @param run
+     *         - A Run object representing a particular execution of Job.
+     * @param listener
+     *         - A TaskListener object which receives events that happen during some
+     *         operation.
      */
     @Override
     public final void onCompleted(final Run run, @Nonnull final TaskListener listener) {
-        if (run != null && getWavefrontManagement().getProxyHostname() != null && !getWavefrontManagement().getProxyHostname().equals("")) {
+        if (run != null && getWavefrontManagement().getProxyHostname() != null
+                && !getWavefrontManagement().getProxyHostname().equals("")) {
             try {
                 sendJobMetricsToWavefront(run);
                 if (run instanceof WorkflowRun) {
                     sendPipelineMetricsToWavefront((WorkflowRun) run);
                 }
-                WavefrontJobProperty jobProperty = (WavefrontJobProperty) run.getParent().getProperty(WavefrontJobProperty.class);
-                if (wfManagement.isEnableSendingJunitReportDataForAllJobs() || (jobProperty != null && jobProperty.isEnableSendingJunitReportData())) {
+                WavefrontJobProperty jobProperty = (WavefrontJobProperty) run.getParent()
+                        .getProperty(WavefrontJobProperty.class);
+                if (wfManagement.isEnableSendingJunitReportDataForAllJobs() || (jobProperty != null
+                        && jobProperty.isEnableSendingJunitReportData())) {
                     sendJunitReportMetricsToWavefront(run);
                 }
-                if (wfManagement.isEnableSendingJacocoReportDataForAllJobs() || (jobProperty != null && jobProperty.isEnableSendingJacocoReportData())) {
+                if (wfManagement.isEnableSendingJacocoReportDataForAllJobs() || (jobProperty != null
+                        && jobProperty.isEnableSendingJacocoReportData())) {
                     sendJacocoReportMetricsToWavefront(run);
                 }
 
-                LOGGER.log(Level.FINE, "Job metrics successfully sent for " + run.getFullDisplayName());
-            } catch (IOException e) {
-                LOGGER.log(Level.WARNING, "Failed to send job metrics to Wavefront for " + run.getFullDisplayName(), e);
+                LOGGER.log(Level.FINE,
+                        "Job metrics successfully sent for " + run.getFullDisplayName());
+            } catch (IOException | NullPointerArgumentException e) {
+                LOGGER.log(Level.WARNING,
+                        "Failed to send job metrics to Wavefront for " + run.getFullDisplayName(),
+                        e);
             }
         }
     }
 
     private void sendJobMetricsToWavefront(Run run) throws IOException {
-        Map<String, String> tags = new HashMap<>();
-        tags.put(STATUS, run.getResult().toString());
-        tags.put(BUILD_NUMBER, run.getId());
+        if (run != null) {
+            Map<String, String> tags = new HashMap<>();
+            Result result = run.getResult();
+            if (result != null) {
+                tags.put(STATUS, result.toString());
+            }
+            tags.put(BUILD_NUMBER, run.getId());
 
-        extractParameterNamesAsTags(run, tags);
+            extractParameterNamesAsTags(run, tags);
 
-        long duration = run.getDuration();
-        String jobName = getJobNameFromRun(run);
-        sendMetricsToWavefront(jobName, duration, tags);
+            long duration = run.getDuration();
+            String jobName = getJobNameFromRun(run);
+            sendMetricsToWavefront(jobName, duration, tags);
+        } else {
+            LOGGER.log(Level.WARNING, "Not sending job metrics to Wavefront, Run is null");
+        }
     }
 
     private void extractParameterNamesAsTags(Run run, Map<String, String> tags) {
-        WavefrontJobProperty jobProperty = (WavefrontJobProperty) run.getParent().getProperty(WavefrontJobProperty.class);
+        WavefrontJobProperty jobProperty = (WavefrontJobProperty) run.getParent()
+                .getProperty(WavefrontJobProperty.class);
         ParametersAction action = run.getAction(ParametersAction.class);
 
         if (action == null) {
             String jobName = getJobNameFromRun(run);
-            LOGGER.log(Level.FINE, "ParametersAction is null, there is NOT defined parameters for job: " + jobName);
+            LOGGER.log(Level.FINE,
+                    "ParametersAction is null, there is NOT defined parameters for job: "
+                            + jobName);
             return;
         }
 
-        int tagSizeCutOff = Math.min(tags.size() + MAX_ALLOWED_JOB_PARAMETER_POINT_TAGS, MAX_ALLOWED_POINT_TAGS);
+        int tagSizeCutOff = Math.min(tags.size() + MAX_ALLOWED_JOB_PARAMETER_POINT_TAGS,
+                MAX_ALLOWED_POINT_TAGS);
         if (jobProperty != null && jobProperty.isEnableSendingJobParameters()) {
-            if (jobProperty.getJobParameters() == null || jobProperty.getJobParameters().isEmpty()) {
+            if (jobProperty.getJobParameters() == null || jobProperty.getJobParameters()
+                    .isEmpty()) {
                 addAllJobParametersAsTags(tags, action, tagSizeCutOff);
             } else {
                 addSpecificJobParametersAsTags(tags, action, jobProperty, tagSizeCutOff);
@@ -148,10 +170,12 @@ public class WavefrontBuildListener extends RunListener<Run> {
     }
 
     private String getJobNameFromRun(Run run) {
-        return Sanitizer.sanitizeMetricCategory(Sanitizer.getDecodeJobName(run.getParent().getFullName()));
+        return Sanitizer.sanitizeMetricCategory(
+                Sanitizer.getDecodeJobName(run.getParent().getFullName()));
     }
 
-    private void addAllJobParametersAsTags(Map<String, String> tags, ParametersAction parametersAction, int maxTagLimit) {
+    private void addAllJobParametersAsTags(Map<String, String> tags,
+            ParametersAction parametersAction, int maxTagLimit) {
         for (ParameterValue p : parametersAction.getParameters()) {
             Object value = p.getValue();
             if (value != null && !value.toString().isEmpty() && tags.size() < maxTagLimit) {
@@ -160,17 +184,22 @@ public class WavefrontBuildListener extends RunListener<Run> {
         }
     }
 
-    private void addSpecificJobParametersAsTags(Map<String, String> tags, ParametersAction parametersAction, WavefrontJobProperty jobProperty, int maxTagLimit) {
+    private void addSpecificJobParametersAsTags(Map<String, String> tags,
+            ParametersAction parametersAction, WavefrontJobProperty jobProperty, int maxTagLimit) {
         String[] jobParameters = jobProperty.getJobParameters().split("\\R+");
         for (String param : jobParameters) {
             ParameterValue p = parametersAction.getParameter(param);
-            if (p != null && p.getValue() != null && !p.getValue().toString().isEmpty() && tags.size() < maxTagLimit) {
-                tags.put(PARAMETER_FIELD_PREFIX + p.getName(), p.getValue().toString());
+            if (p != null) {
+                Object value = p.getValue();
+                if (value != null && !value.toString().isEmpty() && tags.size() < maxTagLimit) {
+                    tags.put(PARAMETER_FIELD_PREFIX + p.getName(), value.toString());
+                }
             }
         }
     }
 
-    private void sendPipelineMetricsToWavefront(WorkflowRun run) throws IOException {
+    private void sendPipelineMetricsToWavefront(WorkflowRun run)
+            throws IOException, NullPointerArgumentException {
         String pipelineName = getJobNameFromRun(run);
         String buildNumber = run.getId();
 
@@ -188,11 +217,13 @@ public class WavefrontBuildListener extends RunListener<Run> {
                             .addTag(BUILD_NUMBER, buildNumber);
 
                     if (isStageNode(node)) {
-                        flowNodeData.setNodeName(Sanitizer.sanitizeMetricCategory(node.getDisplayName()));
-                        sendStageMetricsData(pipelineName, flowNodeData);
+                        flowNodeData.setNodeName(
+                                Sanitizer.sanitizeMetricCategory(node.getDisplayName()));
+                        sendStageMetricsData(flowNodeData);
                     } else if (hasParallelLabelAction(node)) {
-                        flowNodeData.setNodeName(Sanitizer.sanitizeMetricCategory(node.getDisplayName().replaceFirst("Branch: ", "")));
-                        sendParallelMetricsData(pipelineName, flowNodeData);
+                        flowNodeData.setNodeName(Sanitizer.sanitizeMetricCategory(
+                                node.getDisplayName().replaceFirst("Branch: ", "")));
+                        sendParallelMetricsData(flowNodeData);
                     }
                 }
                 if (node instanceof BlockEndNode) {
@@ -231,24 +262,32 @@ public class WavefrontBuildListener extends RunListener<Run> {
 
     }
 
-    private long calculateDuration(FlowNode start, FlowNode end) {
-        TimingAction startTimeAction = start.getAction(TimingAction.class);
-        TimingAction endTimeAction = end.getAction(TimingAction.class);
-        return endTimeAction.getStartTime() - startTimeAction.getStartTime();
+    private long calculateDuration(FlowNode start, FlowNode end)
+            throws NullPointerArgumentException {
+        if (start != null && end != null) {
+            TimingAction startTimeAction = start.getAction(TimingAction.class);
+            TimingAction endTimeAction = end.getAction(TimingAction.class);
+            if (startTimeAction != null && endTimeAction != null ) {
+                return endTimeAction.getStartTime() - startTimeAction.getStartTime();
+            } else {
+                throw new NullPointerArgumentException("startTimeAction or endTimeAction is null");
+            }
+        }
+        throw new NullPointerArgumentException("Start or End FlowNode is null");
     }
 
     private void sendStageMetricsData(
-            String pipelineName,
             FlowNodeData nodeData
     ) throws IOException {
-        sendMetricsToWavefront(pipelineName + ".stage." + nodeData.nodeName, nodeData.duration, nodeData.tags);
+        sendMetricsToWavefront(nodeData.pipelineName + ".stage." + nodeData.nodeName,
+                nodeData.duration, nodeData.tags);
     }
 
     private void sendParallelMetricsData(
-            String pipelineName,
             FlowNodeData nodeData
     ) throws IOException {
-        sendMetricsToWavefront(pipelineName + ".parallel." + nodeData.nodeName, nodeData.duration, nodeData.tags);
+        sendMetricsToWavefront(nodeData.pipelineName + ".parallel." + nodeData.nodeName,
+                nodeData.duration, nodeData.tags);
     }
 
     public String getNodeStatus(FlowNode node) {
@@ -264,21 +303,24 @@ public class WavefrontBuildListener extends RunListener<Run> {
 
     private boolean hasParallelLabelAction(FlowNode node) {
         try {
-            Class<?> requiredClass = Class.forName("org.jenkinsci.plugins.workflow.cps.steps.ParallelStepExecution$ParallelLabelAction");
+            Class<?> requiredClass = Class.forName(
+                    "org.jenkinsci.plugins.workflow.cps.steps.ParallelStepExecution$ParallelLabelAction");
             for (Action action : node.getActions()) {
                 if (action.getClass() == requiredClass) {
                     return true;
                 }
             }
         } catch (ClassNotFoundException e) {
-            LOGGER.log(Level.WARNING, "Failed to get class: ParallelStepExecution$ParallelLabelAction", e);
+            LOGGER.log(Level.WARNING,
+                    "Failed to get class: ParallelStepExecution$ParallelLabelAction", e);
         }
 
         return false;
     }
 
     public static boolean isStageNode(FlowNode node) {
-        return (node.getAction(LabelAction.class) != null && node.getAction(ThreadNameAction.class) == null);
+        return (node.getAction(LabelAction.class) != null
+                && node.getAction(ThreadNameAction.class) == null);
     }
 
     private void sendJunitReportMetricsToWavefront(Run run) throws IOException {
@@ -304,7 +346,8 @@ public class WavefrontBuildListener extends RunListener<Run> {
         }
     }
 
-    private void sendJobLevelJunitMetricsToWavefront(String jobName, final TestResultAction action, Map<String, String> tags) throws IOException {
+    private void sendJobLevelJunitMetricsToWavefront(String jobName, final TestResultAction action,
+            Map<String, String> tags) throws IOException {
         String jobMetricName = "junit." + jobName;
         String countMetricName = "%s.%scount";
         int skipped = action.getSkipCount();
@@ -314,17 +357,20 @@ public class WavefrontBuildListener extends RunListener<Run> {
 
         // Duration metric
         double fullDurationForTests = action.getResult().getDuration() * 1000;
-        sendMetricsToWavefront(jobMetricName, fullDurationForTests, tags); // send whole time required for tests
+        sendMetricsToWavefront(jobMetricName, fullDurationForTests,
+                tags); // send whole time required for tests
 
         // Junit Tests Count metric
-        sendMetricsToWavefront(String.format(countMetricName, jobMetricName, "skip"), skipped, tags);
+        sendMetricsToWavefront(String.format(countMetricName, jobMetricName, "skip"), skipped,
+                tags);
         sendMetricsToWavefront(String.format(countMetricName, jobMetricName, "fail"), failed, tags);
         sendMetricsToWavefront(String.format(countMetricName, jobMetricName, "total"), total, tags);
         sendMetricsToWavefront(String.format(countMetricName, jobMetricName, "pass"), passed, tags);
 
     }
 
-    private void sendJUnitTestResultMetricsToWavefront(Collection<? extends TestResult> testResults, Map<String, String> tags) throws IOException {
+    private void sendJUnitTestResultMetricsToWavefront(Collection<? extends TestResult> testResults,
+            Map<String, String> tags) throws IOException {
 
         for (TestResult testResult : testResults) {
             String fullTestName = testResult.getFullDisplayName();
@@ -335,68 +381,87 @@ public class WavefrontBuildListener extends RunListener<Run> {
     }
 
     private void sendJacocoReportMetricsToWavefront(Run run) throws IOException {
-        String jobName = getJobNameFromRun(run);
-        String buildNumber = run.getId();
+        if (run != null) {
+            String jobName = getJobNameFromRun(run);
+            String buildNumber = run.getId();
 
-        JacocoBuildAction action = run.getAction(JacocoBuildAction.class);
-        if (action != null) {
-            Map<String, Integer> metrics = new HashMap<>();
-            metrics.put("instructions-coverage", action.getInstructionCoverage().getPercentage());
-            metrics.put("branch-coverage", action.getBranchCoverage().getPercentage());
-            metrics.put("complexity-coverage", action.getComplexityScore().getPercentage());
-            metrics.put("line-coverage", action.getLineCoverage().getPercentage());
-            metrics.put("method-coverage", action.getMethodCoverage().getPercentage());
-            metrics.put("class-coverage", action.getClassCoverage().getPercentage());
+            JacocoBuildAction action = run.getAction(JacocoBuildAction.class);
+            if (action != null) {
+                Map<String, Integer> metrics = new HashMap<>();
+                metrics.put("instructions-coverage",
+                        action.getInstructionCoverage().getPercentage());
+                metrics.put("branch-coverage", action.getBranchCoverage().getPercentage());
+                metrics.put("complexity-coverage", action.getComplexityScore().getPercentage());
+                metrics.put("line-coverage", action.getLineCoverage().getPercentage());
+                metrics.put("method-coverage", action.getMethodCoverage().getPercentage());
+                metrics.put("class-coverage", action.getClassCoverage().getPercentage());
 
-            metrics.put("instructions-coverage.minimum", action.getThresholds().getMinInstruction());
-            metrics.put("branch-coverage.minimum", action.getThresholds().getMinBranch());
-            metrics.put("complexity-coverage.minimum", action.getThresholds().getMinComplexity());
-            metrics.put("line-coverage.minimum", action.getThresholds().getMinLine());
-            metrics.put("method-coverage.minimum", action.getThresholds().getMinMethod());
-            metrics.put("class-coverage.minimum", action.getThresholds().getMinClass());
+                metrics.put("instructions-coverage.minimum",
+                        action.getThresholds().getMinInstruction());
+                metrics.put("branch-coverage.minimum", action.getThresholds().getMinBranch());
+                metrics.put("complexity-coverage.minimum",
+                        action.getThresholds().getMinComplexity());
+                metrics.put("line-coverage.minimum", action.getThresholds().getMinLine());
+                metrics.put("method-coverage.minimum", action.getThresholds().getMinMethod());
+                metrics.put("class-coverage.minimum", action.getThresholds().getMinClass());
 
-            metrics.put("instructions-coverage.maximum", action.getThresholds().getMaxInstruction());
-            metrics.put("branch-coverage.maximum", action.getThresholds().getMaxBranch());
-            metrics.put("complexity-coverage.maximum", action.getThresholds().getMaxComplexity());
-            metrics.put("line-coverage.maximum", action.getThresholds().getMaxLine());
-            metrics.put("method-coverage.maximum", action.getThresholds().getMaxMethod());
-            metrics.put("class-coverage.maximum", action.getThresholds().getMaxClass());
+                metrics.put("instructions-coverage.maximum",
+                        action.getThresholds().getMaxInstruction());
+                metrics.put("branch-coverage.maximum", action.getThresholds().getMaxBranch());
+                metrics.put("complexity-coverage.maximum",
+                        action.getThresholds().getMaxComplexity());
+                metrics.put("line-coverage.maximum", action.getThresholds().getMaxLine());
+                metrics.put("method-coverage.maximum", action.getThresholds().getMaxMethod());
+                metrics.put("class-coverage.maximum", action.getThresholds().getMaxClass());
 
-            metrics.put("instructions-coverage.covered", action.getInstructionCoverage().getCovered());
-            metrics.put("branch-coverage.covered", action.getBranchCoverage().getCovered());
-            metrics.put("complexity-coverage.covered", action.getComplexityScore().getCovered());
-            metrics.put("line-coverage.covered", action.getLineCoverage().getCovered());
-            metrics.put("method-coverage.covered", action.getMethodCoverage().getCovered());
-            metrics.put("class-coverage.covered", action.getClassCoverage().getCovered());
+                metrics.put("instructions-coverage.covered",
+                        action.getInstructionCoverage().getCovered());
+                metrics.put("branch-coverage.covered", action.getBranchCoverage().getCovered());
+                metrics.put("complexity-coverage.covered",
+                        action.getComplexityScore().getCovered());
+                metrics.put("line-coverage.covered", action.getLineCoverage().getCovered());
+                metrics.put("method-coverage.covered", action.getMethodCoverage().getCovered());
+                metrics.put("class-coverage.covered", action.getClassCoverage().getCovered());
 
-            metrics.put("instructions-coverage.total", action.getInstructionCoverage().getTotal());
-            metrics.put("branch-coverage.total", action.getBranchCoverage().getTotal());
-            metrics.put("complexity-coverage.total", action.getComplexityScore().getTotal());
-            metrics.put("line-coverage.total", action.getLineCoverage().getTotal());
-            metrics.put("method-coverage.total", action.getMethodCoverage().getTotal());
-            metrics.put("class-coverage.total", action.getClassCoverage().getTotal());
+                metrics.put("instructions-coverage.total",
+                        action.getInstructionCoverage().getTotal());
+                metrics.put("branch-coverage.total", action.getBranchCoverage().getTotal());
+                metrics.put("complexity-coverage.total", action.getComplexityScore().getTotal());
+                metrics.put("line-coverage.total", action.getLineCoverage().getTotal());
+                metrics.put("method-coverage.total", action.getMethodCoverage().getTotal());
+                metrics.put("class-coverage.total", action.getClassCoverage().getTotal());
 
-            Map<String, String> tags = new HashMap<>();
-            tags.put(STATUS, run.getResult().toString());
-            tags.put(BUILD_NUMBER, buildNumber);
-            sendCodeCoverageMetricsToWavefront(jobName, metrics, tags);
+                Map<String, String> tags = new HashMap<>();
+                Result result = run.getResult();
+                if (result != null) {
+                    tags.put(STATUS, result.toString());
+                }
+                tags.put(BUILD_NUMBER, buildNumber);
+                sendCodeCoverageMetricsToWavefront(jobName, metrics, tags);
+            }
+        } else {
+            LOGGER.log(Level.WARNING, "Not sending jacoco report to wavefront, Run is null");
         }
     }
 
-    private void sendCodeCoverageMetricsToWavefront(String jobName, Map<String, Integer> metrics, Map<String, String> tags) throws IOException {
+    private void sendCodeCoverageMetricsToWavefront(String jobName, Map<String, Integer> metrics,
+            Map<String, String> tags) throws IOException {
         for (Entry<String, Integer> metric : metrics.entrySet()) {
             String metricName = jobName + ".jacoco." + metric.getKey();
             sendMetricsToWavefront(metricName, metric.getValue(), tags);
         }
     }
 
-    private void sendMetricsToWavefront(String jobName, double metricValue, Map<String, String> tags) throws IOException {
+    private void sendMetricsToWavefront(String jobName, double metricValue,
+            Map<String, String> tags) throws IOException {
         String name = wfManagement.getJobMetricsPrefixName() + "." + jobName;
         if (name.length() >= 255) {
-            LOGGER.log(Level.WARNING, "The metric has not been sent to wavefront, name is too long: " + name);
+            LOGGER.log(Level.WARNING,
+                    "The metric has not been sent to wavefront, name is too long: " + name);
         }
-        WavefrontMonitor.getWavefrontSender().sendMetric(name, metricValue, System.currentTimeMillis(),
-                wfManagement.getProxyHostname(), tags);
+        WavefrontMonitor.getWavefrontSender()
+                .sendMetric(name, metricValue, System.currentTimeMillis(),
+                        wfManagement.getProxyHostname(), tags);
     }
 
     private WavefrontManagement getWavefrontManagement() {

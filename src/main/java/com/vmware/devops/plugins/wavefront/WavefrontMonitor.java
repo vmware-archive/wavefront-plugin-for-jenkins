@@ -37,6 +37,7 @@ import hudson.model.AperiodicWork;
 import hudson.model.Label;
 import hudson.model.LoadStatistics.LoadStatisticsSnapshot;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import jenkins.model.Jenkins;
 
 @Extension
@@ -64,12 +65,14 @@ public class WavefrontMonitor extends AperiodicWork {
     private static WavefrontMonitor currentTask = null;
     private static boolean isWavefrontSenderClosed = false;
 
+    @SuppressFBWarnings("ST_WRITE_TO_STATIC_FROM_INSTANCE_METHOD")
     public WavefrontMonitor() {
         wfManagement = WavefrontManagement.get();
     }
 
+    @SuppressFBWarnings("ST_WRITE_TO_STATIC_FROM_INSTANCE_METHOD")
     @Override
-    public AperiodicWork getNewInstance() {
+    public synchronized AperiodicWork getNewInstance() {
         if (currentTask != null) {
             currentTask.cancel();
         }
@@ -110,9 +113,12 @@ public class WavefrontMonitor extends AperiodicWork {
     }
 
     public void sendMetricsToWavefrontFromLabels(String source) throws IOException {
-        Label[] labels = Jenkins.getInstanceOrNull().getLabels().toArray(new Label[0]);
-        for (Label l : labels) {
-            sendMetricsToWavefront(LABEL + "." + l.getDisplayName(), l.loadStatistics.computeSnapshot(), source);
+        Jenkins jenkinsInstance = Jenkins.getInstanceOrNull();
+        if (jenkinsInstance != null) {
+            Label[] labels = jenkinsInstance.getLabels().toArray(new Label[0]);
+            for (Label l : labels) {
+                sendMetricsToWavefront(LABEL + "." + l.getDisplayName(), l.loadStatistics.computeSnapshot(), source);
+            }
         }
     }
 
@@ -154,9 +160,13 @@ public class WavefrontMonitor extends AperiodicWork {
     }
 
     public static WavefrontMonitor getInstance() {
-        ExtensionList<WavefrontMonitor> list = Jenkins.getInstanceOrNull().getExtensionList(WavefrontMonitor.class);
-        assert list.size() == 1;
-        return list.iterator().next();
+        Jenkins jenkinsInstance = Jenkins.getInstanceOrNull();
+        if (jenkinsInstance != null) {
+            ExtensionList<WavefrontMonitor> list = jenkinsInstance.getExtensionList(WavefrontMonitor.class);
+            assert list.size() == 1;
+            return list.iterator().next();
+        }
+        throw new IllegalStateException("Can't retrieve Jenkins instance");
     }
 
     public static WavefrontProxyClient getWavefrontSender() {
@@ -191,6 +201,7 @@ public class WavefrontMonitor extends AperiodicWork {
         return currentTask;
     }
 
+    @SuppressFBWarnings("ST_WRITE_TO_STATIC_FROM_INSTANCE_METHOD")
     public void setWavefrontSenderClosed(boolean isClosed) {
         this.isWavefrontSenderClosed = isClosed;
     }

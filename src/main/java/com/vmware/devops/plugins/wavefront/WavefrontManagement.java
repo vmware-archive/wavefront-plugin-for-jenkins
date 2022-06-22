@@ -184,11 +184,19 @@ public class WavefrontManagement extends ManagementLink implements StaplerProxy,
 
     @Override
     public DescriptorImpl getDescriptor() {
-        return Jenkins.getInstanceOrNull().getDescriptorByType(DescriptorImpl.class);
+        Jenkins jenkinsInstance = Jenkins.getInstanceOrNull();
+        if (jenkinsInstance != null) {
+            return jenkinsInstance.getDescriptorByType(DescriptorImpl.class);
+        }
+        throw new IllegalStateException("Can't retrieve Jenkins instance");
     }
 
     public XmlFile getConfigXml() {
-        return new XmlFile(Jenkins.XSTREAM, new File(Jenkins.getInstanceOrNull().getRootDir(), this.getXmlFileName()));
+        Jenkins jenkinsInstance = Jenkins.getInstanceOrNull();
+        if (jenkinsInstance != null) {
+            return new XmlFile(Jenkins.XSTREAM, new File(jenkinsInstance.getRootDir(), this.getXmlFileName()));
+        }
+        throw new IllegalStateException("Can't retrieve Jenkins instance");
     }
 
     protected String getXmlFileName() {

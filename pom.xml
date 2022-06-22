@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>plugin</artifactId>
-        <version>3.24</version>
+        <version>4.31</version>
         <relativePath />
     </parent>
 
@@ -24,7 +24,7 @@
     </licenses>
     
     <properties>
-        <jenkins.version>2.172</jenkins.version>
+        <jenkins.version>2.222.4</jenkins.version>
         <java.level>8</java.level>
     </properties>
 
@@ -71,7 +71,7 @@
         <dependency>
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
             <artifactId>workflow-job</artifactId>
-            <version>2.32</version>
+            <version>2.42</version>
         </dependency>
 
         <dependency>
@@ -83,7 +83,7 @@
         <dependency>
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
             <artifactId>workflow-cps</artifactId>
-            <version>2.65</version>
+            <version>2648.va9433432b33c</version>
         </dependency>
 
         <dependency>
@@ -136,7 +136,7 @@
             <plugin>
                 <groupId>org.kohsuke</groupId>
                 <artifactId>access-modifier-checker</artifactId>
-                <version>${access-modifier.version}</version>
+                <version>${access-modifier-checker.version}</version>
                 <configuration>
                     <properties>
                         <property>
