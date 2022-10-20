@@ -97,16 +97,17 @@ public class WavefrontMonitorTest {
         List<String> messages = proxy.terminate();
         Set<String> metricsNames = parseMessages(messages);
         List<String> expected = new ArrayList<>(Arrays.asList(
-                metricPrefix + ".label.master.available-executors",
-                metricPrefix + ".label.master.busy-executors",
-                metricPrefix + ".label.master.connecting-executors",
-                metricPrefix + ".label.master.defined-executors",
-                metricPrefix + ".label.master.idle-executors",
-                metricPrefix + ".label.master.online-executors",
-                metricPrefix + ".label.master.queue-length"
+                metricPrefix + ".label.built-in.available-executors",
+                metricPrefix + ".label.built-in.busy-executors",
+                metricPrefix + ".label.built-in.connecting-executors",
+                metricPrefix + ".label.built-in.defined-executors",
+                metricPrefix + ".label.built-in.idle-executors",
+                metricPrefix + ".label.built-in.online-executors",
+                metricPrefix + ".label.built-in.queue-length"
         ));
         boolean result = metricsNames.containsAll(expected);
         if (!result) {
+            System.out.println(metricsNames);
             expected.removeAll(metricsNames);
             String message = "Messages above are missing, not as expected:";
             for (String metricName : expected) {
@@ -128,13 +129,13 @@ public class WavefrontMonitorTest {
                 metricPrefix + ".free-physical-memory",
                 metricPrefix + ".max-heap-memory",
                 metricPrefix + ".used-heap-memory",
-                metricPrefix + ".label.master.available-executors",
-                metricPrefix + ".label.master.busy-executors",
-                metricPrefix + ".label.master.connecting-executors",
-                metricPrefix + ".label.master.defined-executors",
-                metricPrefix + ".label.master.idle-executors",
-                metricPrefix + ".label.master.online-executors",
-                metricPrefix + ".label.master.queue-length"
+                metricPrefix + ".label.built-in.available-executors",
+                metricPrefix + ".label.built-in.busy-executors",
+                metricPrefix + ".label.built-in.connecting-executors",
+                metricPrefix + ".label.built-in.defined-executors",
+                metricPrefix + ".label.built-in.idle-executors",
+                metricPrefix + ".label.built-in.online-executors",
+                metricPrefix + ".label.built-in.queue-length"
         ));
         boolean result = metricsNames.containsAll(expected);
         if (!result) {
